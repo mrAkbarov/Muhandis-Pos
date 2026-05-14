@@ -1,3 +1,10 @@
 .venv
 .idea
 .env
+
+
+README.md
+
+ctrl + k            - commit
+ctrl + t            - pull
+ctrl + shift + k    - push
