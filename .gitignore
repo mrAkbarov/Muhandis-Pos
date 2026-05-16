@@ -1,6 +1,7 @@
 .venv
 .idea
 .env
+node_modules
 
 
 README.md
