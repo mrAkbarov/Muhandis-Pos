@@ -1,118 +1,142 @@
 🚀 SmartPOS-AI
 
-A modern, scalable, real-time Point of Sale (POS) & Inventory Management System with CRM, Analytics, and Multi-Branch support.
+A scalable, modular Point of Sale (POS) & Business Management System built with Django REST Framework, PostgreSQL, and Next.js.
 
 📌 Overview
 
-SmartPOS-AI — bu retail bizneslar uchun mo‘ljallangan to‘liq POS tizim bo‘lib, u quyidagilarni qamrab oladi:
+SmartPOS-AI — bu retail bizneslar uchun mo‘ljallangan professional POS tizimi bo‘lib, quyidagi funksiyalarni qamrab oladi:
 
 🛒 Sales (POS system)
-📦 Inventory Management
-👥 Customer Relationship Management (CRM)
-📊 Analytics & Reporting
+📦 Inventory management
+👥 CRM (Customer management)
+📊 Analytics & reporting
 🏬 Multi-branch support
-🔔 Real-time notifications
-⚡ WebSocket-based live updates
-🏗 Architecture
+🔔 Notifications system
+⚡ Real-time updates (WebSockets)
+🏗 System Architecture
 
-Project modular monolith architecture asosida qurilgan bo‘lib, clean separation of concerns tamoyiliga amal qiladi.
+Project modular monolith architecture asosida qurilgan va Django app-based structure ga tayanadi.
 
 smartpos-ai/
 │
-├── backend/        # Business logic (API + services)
-├── frontend/       # Next.js UI (Dashboard + POS)
-├── database/       # PostgreSQL schema & migrations
-├── docker/         # Containerization setup
-├── nginx/          # Reverse proxy configuration
-├── scripts/        # Automation scripts
-├── docs/           # Technical documentation
-└── README.md
-🧠 Backend Architecture
+├── backend/          # Django REST Framework backend
+├── frontend/         # Next.js UI
+├── database/         # PostgreSQL schema & migrations
+├── docker/           # Container setup
+├── nginx/            # Reverse proxy config
+├── scripts/          # Automation scripts
+└── docs/             # Documentation
+🧠 Backend (Django REST Framework)
 
-Backend modular structure asosida qurilgan:
+Backend Django apps asosida modular tarzda ajratilgan:
 
 backend/app/
 │
-├── api/            # Route handlers (REST API)
-├── models/         # Database models
-├── schemas/        # Data validation (Pydantic)
-├── services/       # Business logic layer
-├── utils/          # Helpers (JWT, barcode, etc.)
-├── middleware/     # Auth, logging, security
-├── jobs/           # Background tasks (cron jobs)
-└── websocket/      # Real-time communication
-📦 Main Modules
-🔐 Auth (JWT-based authentication)
-👤 Users management
-📦 Products & Inventory
-🛒 Sales (POS engine)
-👥 Customers (CRM)
+├── api/
+│   ├── auth/
+│   ├── users/
+│   ├── products/
+│   ├── inventory/
+│   ├── sales/
+│   ├── customers/
+│   ├── suppliers/
+│   ├── analytics/
+│   ├── reports/
+│   ├── notifications/
+│   └── branches/
+│
+├── models/          # Django models
+├── serializers/     # DRF serializers
+├── services/        # Business logic layer
+├── utils/           # Helpers (JWT, barcode, etc.)
+├── middleware/      # Auth, logging, permissions
+├── tasks/           # Celery / background jobs
+└── consumers/       # WebSocket (Django Channels)
+📦 Core Modules
+🔐 Authentication
+JWT authentication
+Role-based access control (RBAC)
+👤 Users
+Admin, cashier, manager roles
+📦 Products
+Product CRUD
+Barcode support
+Pricing system
+📊 Inventory
+Stock management
+Incoming / outgoing tracking
+🛒 Sales (POS Engine)
+Checkout system
+Receipt generation
+Discount & payment handling
+👥 CRM
+Customer profiles
+Purchase history
+Debt tracking
 🚚 Suppliers
-📊 Analytics & Reports
+Supply management
+Purchase orders
+📈 Analytics & Reports
+Daily sales reports
+Profit tracking
+Best-selling products
+🏬 Branches
+Multi-branch support
+Centralized control
 🔔 Notifications
-🏬 Branch management
+Low stock alerts
+System notifications
 ⚛️ Frontend (Next.js)
-
-Frontend modern UI/UX bilan ishlab chiqilgan:
-
 frontend/src/
 │
-├── app/            # Pages (Dashboard, POS, etc.)
-├── components/     # Reusable UI components
-├── services/       # API communication layer
+├── app/            # Pages (dashboard, POS, etc.)
+├── components/     # UI components
+├── services/       # API calls (Django backend)
 ├── store/          # State management (cart, auth)
 ├── hooks/          # Custom hooks
-├── lib/            # Axios, WebSocket config
+├── lib/            # Axios, WebSocket setup
 ├── types/          # TypeScript types
 └── styles/         # Global styles
-🐘 Database
-PostgreSQL ishlatiladi
-Schema migration support
-Seed data included
-Core Tables:
+🐘 Database (PostgreSQL)
+Main tables:
 users
+roles
 products
+categories
 inventory
 sales
 sale_items
 customers
 suppliers
 branches
+payments
 ⚡ Real-Time Features
-WebSocket-based live POS updates
-Instant stock synchronization
-Live sales tracking
-Notifications system
+
+Using Django Channels + WebSockets:
+
+Live POS updates
+Stock synchronization
+Real-time sales dashboard
+Instant notifications
 🐳 DevOps & Deployment
 
 Project fully containerized:
 
 Docker (backend, frontend, postgres)
 Nginx reverse proxy
-Shell scripts for automation
+CI/CD ready structure
 Scripts:
-deploy.sh → production deploy
+deploy.sh → production deployment
 backup.sh → database backup
-migrate.sh → DB migrations
-seed.sh → test data
-📊 Key Features
-
-✔ Multi-branch support
-✔ Real-time POS system
-✔ Inventory tracking
-✔ Customer management (CRM)
-✔ Sales analytics
-✔ Role-based access control
-✔ JWT authentication
-✔ WebSocket live updates
-✔ Scalable modular architecture
-
+migrate.sh → migrations
+seed.sh → initial data
 🧱 Tech Stack
 Backend
-FastAPI / Django REST (depending on final choice)
+Django REST Framework
+Django ORM
 PostgreSQL
-WebSockets
-Redis (optional caching)
+Django Channels (WebSockets)
+Celery (background tasks)
 Frontend
 Next.js
 TypeScript
@@ -121,23 +145,17 @@ Zustand / Redux
 DevOps
 Docker
 Nginx
-Linux server deployment
+Linux server
 📐 Design Principles
-Clean Architecture
-Separation of Concerns
-Scalable modular structure
-Service-oriented business logic
-Real-time first design
-🚀 Goal
+Clean Architecture (DRF apps separation)
+Service Layer pattern
+Scalable modular design
+API-first architecture
+Real-time ready system
+🚀 Project Goal
 
-This system is designed to be:
+Build a production-ready POS ecosystem that supports multi-branch retail businesses with real-time synchronization, analytics, and scalable architecture.
 
-A production-ready, scalable POS platform for retail businesses with real-time synchronization and multi-branch support.
-
-📌 Notes 
-Backend structure currently follows FastAPI-style modular architecture
-Can be adapted to Django REST Framework if required
-Designed for scalability and future microservices migration
 👨‍💻 Author
 
-SmartPOS-AI Teamv
+SmartPOS-AI Team
