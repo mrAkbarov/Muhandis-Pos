@@ -328,25 +328,3 @@ wheels = [
 name = "valijon-project"
 version = "0.1.0"
 source = { virtual = "." }
-dependencies = [
-    { name = "django" },
-    { name = "django-filter" },
-    { name = "djangorestframework" },
-    { name = "djangorestframework-simplejwt" },
-    { name = "drf-spectacular" },
-    { name = "psycopg2-binary" },
-    { name = "python-dotenv" },
-    { name = "redis" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "django", specifier = ">=6.0.4" },
-    { name = "django-filter", specifier = ">=25.2" },
-    { name = "djangorestframework", specifier = ">=3.17.1" },
-    { name = "djangorestframework-simplejwt", specifier = ">=5.5.1" },
-    { name = "drf-spectacular", specifier = ">=0.29.0" },
-    { name = "psycopg2-binary", specifier = ">=2.9.11" },
-    { name = "python-dotenv", specifier = ">=1.2.2" },
-    { name = "redis", specifier = ">=7.4.0" },
-]
