@@ -1,100 +1,103 @@
-from django.contrib.auth import authenticate
-from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField
-from rest_framework.serializers import ModelSerializer, Serializer
+from rest_framework.fields import SerializerMethodField, DateTimeField, HiddenField, CurrentUserDefault
+from rest_framework.serializers import ModelSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from models.users import User
+from models import Product, SaleItem, Sale, User, Inventory
 
 
-class UserModelSerializer(ModelSerializer):
-    full_name = CharField(read_only=True)
-    password = CharField(write_only=True, required=False)
+class ProductSerializer(ModelSerializer):
+
+    stock = SerializerMethodField()
+    created_at = DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+
+    class Meta:
+        model = Product
+        fields = ("id","name","price","barcode","category","stock","created_at")
+
+
+
+class SaleItemSerializer(ModelSerializer):
+
+    class Meta:
+        model = SaleItem
+        fields = ("product", "quantity", "price")
+
+
+
+class SaleSerializer(ModelSerializer):
+
+    items = SaleItemSerializer(many=True)
+    cashier = HiddenField(default=CurrentUserDefault())
+    created_at = DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+
+    total_price = SerializerMethodField()
+
+    class Meta:
+        model = Sale
+        fields = ("id","cashier","branch","items","total_price","created_at")
+
+        read_only_fields = ("cashier",)
+
+
+
+    def create(self, validated_data):
+
+        items_data = validated_data.pop("items")
+        user = self.context["request"].user
+
+        sale = Sale.objects.create(cashier=user, **validated_data)
+
+        total = 0
+
+        for item in items_data:
+            SaleItem.objects.create(
+                sale=sale,
+                product=item["product"],
+                quantity=item["quantity"],
+                price=item["price"]
+            )
+
+            total += item["quantity"] * item["price"]
+
+        sale.total_price = total
+        sale.save()
+
+        return sale
+
+
+    def get_total_price(self, obj):
+        return obj.total_price
+
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+
+        token = cls.token_class.for_user(user)
+
+        token["role"] = user.role
+        token["phone"] = user.phone
+        token["name"] = user.first_name
+
+        return token
+
+
+class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            'id', 'phone', 'email', 'first_name', 'last_name',
-            'full_name', 'role', 'avatar', 'is_active', 'password'
-        ]
+        fields = ("id","phone","first_name","last_name","role","is_active","created_at")
 
-    def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        user = User(**validated_data)
-        if password:
-            user.set_password(password)
-        user.save()
-        return user
-
-    def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        if password:
-            instance.set_password(password)
-        instance.save()
-        return instance
+        read_only_fields = ("is_active", "created_at")
 
 
-class RegisterModelSerializer(ModelSerializer):
-    password = CharField(write_only=True)
-    confirm_password = CharField(write_only=True)
+class InventorySerializer(ModelSerializer):
+
+    product_name = SerializerMethodField()
+    branch_name = SerializerMethodField()
 
     class Meta:
-        model = User
-        fields = [
-            'id', 'phone', 'email', 'first_name', 'last_name', 'password', 'confirm_password',
-        ]
-        extra_kwargs = {
-            'id': {'read_only': True}
-        }
-
-    def validate(self, attrs):
-        if attrs.get('password') != attrs.pop('confirm_password', None):
-            raise ValidationError({
-                'confirm_password': "Passwords do not match."
-            })
-        return attrs
-
-    def validate_phone(self, value):
-        if not value.startswith('+998'):
-            raise ValidationError("Telefon +998 bilan boshlanishi kerak")
-
-        if not value[1:].isdigit():
-            raise ValidationError("The phone number must start with +998")
-
-        if len(value) != 13:
-            raise ValidationError("Invalid phone number.")
-        return value
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise ValidationError("Password must be at least 8 characters")
-        return value
-
-    def create(self, validated_data):
-        validated_data.pop('confirm_password')
-        return User.objects.create_user(**validated_data)
-
-
-class LoginModelSerializer(Serializer):
-    phone = CharField()
-    password = CharField(write_only=True)
-
-    def validate(self, attrs):
-        phone = attrs.get('phone')
-        password = attrs.get('password')
-
-        user = authenticate(
-            request=self.context.get('request'),
-            phone=phone,
-            password=password
-        )
-
-        if not user:
-            raise ValidationError("Incorrect phone number or password.")
-
-        if not user.is_active:
-            raise ValidationError("User is not active.")
-
-        attrs['user'] = user
-        return attrs
+        model = Inventory
+        fields = ("id","product","product_name","branch","branch_name","quantity","updated_at")
