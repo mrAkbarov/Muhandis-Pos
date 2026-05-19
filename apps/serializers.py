@@ -1,0 +1,100 @@
+from django.contrib.auth import authenticate
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import CharField
+from rest_framework.serializers import ModelSerializer, Serializer
+
+from models.users import User
+
+
+class UserModelSerializer(ModelSerializer):
+    full_name = CharField(read_only=True)
+    password = CharField(write_only=True, required=False)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'phone', 'email', 'first_name', 'last_name',
+            'full_name', 'role', 'avatar', 'is_active', 'password'
+        ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
+class RegisterModelSerializer(ModelSerializer):
+    password = CharField(write_only=True)
+    confirm_password = CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'phone', 'email', 'first_name', 'last_name', 'password', 'confirm_password',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.pop('confirm_password', None):
+            raise ValidationError({
+                'confirm_password': "Passwords do not match."
+            })
+        return attrs
+
+    def validate_phone(self, value):
+        if not value.startswith('+998'):
+            raise ValidationError("Telefon +998 bilan boshlanishi kerak")
+
+        if not value[1:].isdigit():
+            raise ValidationError("The phone number must start with +998")
+
+        if len(value) != 13:
+            raise ValidationError("Invalid phone number.")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise ValidationError("Password must be at least 8 characters")
+        return value
+
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')
+        return User.objects.create_user(**validated_data)
+
+
+class LoginModelSerializer(Serializer):
+    phone = CharField()
+    password = CharField(write_only=True)
+
+    def validate(self, attrs):
+        phone = attrs.get('phone')
+        password = attrs.get('password')
+
+        user = authenticate(
+            request=self.context.get('request'),
+            phone=phone,
+            password=password
+        )
+
+        if not user:
+            raise ValidationError("Incorrect phone number or password.")
+
+        if not user.is_active:
+            raise ValidationError("User is not active.")
+
+        attrs['user'] = user
+        return attrs
