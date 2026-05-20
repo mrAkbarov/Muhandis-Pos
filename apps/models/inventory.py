@@ -1,9 +1,7 @@
-from django.db import models
 from django.db.models import Model, ForeignKey, CASCADE, PositiveIntegerField, CharField, TextField, DateTimeField
 
 
 class Inventory(Model):
-
     branch = ForeignKey("apps.Branch", on_delete=CASCADE)
     product = ForeignKey("apps.Product", on_delete=CASCADE)
 
@@ -14,7 +12,6 @@ class Inventory(Model):
 
 
 class StockMovement(Model):
-
     MOVEMENT_TYPES = (
         ("in", "IN"),
         ("out", "OUT"),

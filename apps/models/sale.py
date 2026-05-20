@@ -1,10 +1,8 @@
-from django.db import models
 from django.db.models import Model, ForeignKey, CASCADE, SET_NULL, DecimalField, CharField, DateTimeField, \
     PositiveIntegerField
 
 
 class Sale(Model):
-
     PAYMENT_METHODS = (
         ("cash", "Cash"),
         ("card", "Card"),
@@ -25,7 +23,6 @@ class Sale(Model):
 
 
 class SaleItem(Model):
-
     sale = ForeignKey("apps.Sale", on_delete=CASCADE)
 
     product = ForeignKey("apps.Product", on_delete=SET_NULL, null=True)

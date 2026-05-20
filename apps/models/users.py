@@ -1,7 +1,9 @@
 import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models import ImageField, EmailField, CharField, UUIDField, BooleanField, TextChoices, DateTimeField
+from django.db.models import ImageField, EmailField, CharField, UUIDField, BooleanField, TextChoices, DateTimeField, \
+    Model
+from django.db.models.fields import DecimalField
 
 
 class UserManager(BaseUserManager):
@@ -24,7 +26,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Role(TextChoices):
         ADMIN = "admin", "Admin"
         MANAGER = "manager", "Manager"
-
 
     id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone = CharField(max_length=20, unique=True)
@@ -57,3 +58,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
+
+
+class Customer(Model):
+    full_name = CharField(max_length=255)
+    phone = CharField(max_length=20, unique=True)
+
+    balance = DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    created_at = DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.full_name
