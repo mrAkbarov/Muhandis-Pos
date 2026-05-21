@@ -72,7 +72,7 @@ export default function Suppliers() {
                 <TableCell>Telefon</TableCell>
                 <TableCell>Manzil</TableCell>
                 <TableCell>Buyurtmalar</TableCell>
-                <TableCell>Reyting</TableCell>
+                {/*<TableCell>Reyting</TableCell>*/}
                 <TableCell>Holat</TableCell>
               </TableRow>
             </TableHead>
@@ -104,20 +104,20 @@ export default function Suppliers() {
                     </div>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{s.totalOrders} ta</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} style={{ fontSize: 14, color: i < s.rating ? '#f59e0b' : '#e5e7eb' }} />
-                      ))}
-                    </div>
-                  </TableCell>
+                  {/*<TableCell>*/}
+                  {/*  <div className="flex items-center gap-0.5">*/}
+                  {/*    {Array.from({ length: 5 }).map((_, i) => (*/}
+                  {/*      <Star key={i} style={{ fontSize: 14, color: i < s.rating ? '#f59e0b' : '#e5e7eb' }} />*/}
+                  {/*    ))}*/}
+                  {/*  </div>*/}
+                  {/*</TableCell>*/}
                   <TableCell>
                     <Chip
                       label={s.status}
                       size="small"
                       sx={{
                         fontSize: 11, fontWeight: 600,
-                        bgcolor: s.status === 'Faol' ? '#f0fdf4' : '#f3f4f6',
+                        bgcolor: s.status === 'Yaxshi' ? '#f0fdf4' : '#f3f4f6',
                         color: s.status === 'Faol' ? '#22c55e' : '#9ca3af',
                       }}
                     />

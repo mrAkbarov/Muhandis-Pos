@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useApp } from '../../context/AppContext';
 import {
   Search,
   NotificationsOutlined,
   FullscreenOutlined,
   CalendarToday,
 } from '@mui/icons-material';
-import { Badge, InputAdornment, TextField } from '@mui/material';
+import { Badge, InputAdornment, TextField, Select, MenuItem } from '@mui/material';
 
 const pageTitles = {
   '/': 'Dashboard',
@@ -24,6 +25,7 @@ const pageTitles = {
 
 export default function Header() {
   const location = useLocation();
+  const { businesses, currentBusinessId, setCurrentBusinessId } = useApp();
   const [search, setSearch] = useState('');
   const today = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -44,36 +46,9 @@ export default function Header() {
       className="flex items-center gap-4 px-6 py-3 bg-white border-b border-gray-100 sticky top-0 z-40"
       style={{ minHeight: 60 }}
     >
-      {/* Search */}
-      <div className="flex-1 max-w-xs">
-        <TextField
-          size="small"
-          placeholder="Qidirish..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search style={{ color: '#9ca3af', fontSize: 18 }} />
-              </InputAdornment>
-            ),
-            style: {
-              borderRadius: 8,
-              fontSize: 14,
-              backgroundColor: '#f8fafc',
-            },
-          }}
-          sx={{
-            width: '100%',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: '#e5e7eb' },
-              '&:hover fieldset': { borderColor: '#4361ee' },
-            },
-          }}
-        />
-      </div>
-
       <div className="flex-1" />
+
+
 
       {/* Date */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -98,3 +73,4 @@ export default function Header() {
     </header>
   );
 }
+

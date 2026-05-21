@@ -1,6 +1,6 @@
 mig:
-	python manage.py makemigrations
-
+	python3 manage.py makemigrations
+	python3 manage.py migrate
 up:
 	python manage.py migrate
 
@@ -13,6 +13,3 @@ apps:
 celery:
 	celery -A root worker -l INFO
 
-#python manage.py dumpdata --indent 4 apps.Post > posts.json
-#python manage.py loaddata posts
-#python manage.py dumpdata apps.Post > posts.json

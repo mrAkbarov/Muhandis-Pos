@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
+from apps.serializers import InventorySerializer
 from models import Product, Sale, Inventory, User
 from serializers import ProductSerializer, SaleSerializer, UserSerializer
 
@@ -48,6 +49,7 @@ class InventoryViewSet(ModelViewSet):
 
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
+
     permission_classes = [IsAuthenticated, IsManagerOrAdmin]
 
     filter_backends = [SearchFilter]

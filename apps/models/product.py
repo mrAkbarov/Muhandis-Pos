@@ -13,6 +13,7 @@ class Product(Model):
     cost_price = DecimalField(max_digits=12, decimal_places=2)
 
     is_active = BooleanField(default=True)
+    is_draft = BooleanField(default=False)
 
     created_at = DateTimeField(auto_now_add=True)
 

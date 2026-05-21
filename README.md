@@ -1,161 +1,61 @@
-🚀 SmartPOS-AI
+# POS tizimi
 
-A scalable, modular Point of Sale (POS) & Business Management System built with Django REST Framework, PostgreSQL, and Next.js.
+Bu loyiha — Vite + React yordamida yaratilgan savdo nuqtasini boshqarish (POS) web-ilovasi. U mahsulotlar, inventarizatsiya, savdo, CRM, yetkazib beruvchilar, buyurtmalar, AI tahlillari va hisob-kitob bo‘limlarini o‘z ichiga oladi.
 
-📌 Overview
+## Loyihaning asosiy funksiyalari
 
-SmartPOS-AI — bu retail bizneslar uchun mo‘ljallangan professional POS tizimi bo‘lib, quyidagi funksiyalarni qamrab oladi:
+- Dashboard: sotuv statistikasi, grafiklar va AI tavsiyalari.
+- POS: savdo nuqtasi interfeysi.
+- Mahsulotlar bo‘limi: mahsulotlarni ko‘rish va boshqarish.
+- Inventarizatsiya: zaxira holati, kam mahsulotlar va tugashlar.
+- CRM: mijozlar bilan ishlash.
+- Yetkazib beruvchilar: ta’minotchilar ro‘yxati.
+- Buyurtmalar: xarid buyurtmalarini kuzatish.
+- AI Analytics: aqlli tahlillar va tavsiyalar.
+- Muddat boshqaruvi: amal qilish muddati yaqin mahsulotlarni kuzatish.
+- Hisobotlar va sozlamalar.
 
-🛒 Sales (POS system)
-📦 Inventory management
-👥 CRM (Customer management)
-📊 Analytics & reporting
-🏬 Multi-branch support
-🔔 Notifications system
-⚡ Real-time updates (WebSockets)
-🏗 System Architecture
+## Texnologiyalar
 
-Project modular monolith architecture asosida qurilgan va Django app-based structure ga tayanadi.
+- React 19
+- Vite
+- React Router DOM
+- Tailwind CSS
+- Material UI (MUI)
+- Recharts
 
-smartpos-ai/
-│
-├── backend/          # Django REST Framework backend
-├── frontend/         # Next.js UI
-├── database/         # PostgreSQL schema & migrations
-├── docker/           # Container setup
-├── nginx/            # Reverse proxy config
-├── scripts/          # Automation scripts
-└── docs/             # Documentation
-🧠 Backend (Django REST Framework)
+## Loyihani ishga tushirish
 
-Backend Django apps asosida modular tarzda ajratilgan:
+1. Loyihani yuklab oling va papkaga o'ting:
 
-backend/app/
-│
-├── api/
-│   ├── auth/
-│   ├── users/
-│   ├── products/
-│   ├── inventory/
-│   ├── sales/
-│   ├── customers/
-│   ├── suppliers/
-│   ├── analytics/
-│   ├── reports/
-│   ├── notifications/
-│   └── branches/
-│
-├── models/          # Django models
-├── serializers/     # DRF serializers
-├── services/        # Business logic layer
-├── utils/           # Helpers (JWT, barcode, etc.)
-├── middleware/      # Auth, logging, permissions
-├── tasks/           # Celery / background jobs
-└── consumers/       # WebSocket (Django Channels)
-📦 Core Modules
-🔐 Authentication
-JWT authentication
-Role-based access control (RBAC)
-👤 Users
-Admin, cashier, manager roles
-📦 Products
-Product CRUD
-Barcode support
-Pricing system
-📊 Inventory
-Stock management
-Incoming / outgoing tracking
-🛒 Sales (POS Engine)
-Checkout system
-Receipt generation
-Discount & payment handling
-👥 CRM
-Customer profiles
-Purchase history
-Debt tracking
-🚚 Suppliers
-Supply management
-Purchase orders
-📈 Analytics & Reports
-Daily sales reports
-Profit tracking
-Best-selling products
-🏬 Branches
-Multi-branch support
-Centralized control
-🔔 Notifications
-Low stock alerts
-System notifications
-⚛️ Frontend (Next.js)
-frontend/src/
-│
-├── app/            # Pages (dashboard, POS, etc.)
-├── components/     # UI components
-├── services/       # API calls (Django backend)
-├── store/          # State management (cart, auth)
-├── hooks/          # Custom hooks
-├── lib/            # Axios, WebSocket setup
-├── types/          # TypeScript types
-└── styles/         # Global styles
-🐘 Database (PostgreSQL)
-Main tables:
-users
-roles
-products
-categories
-inventory
-sales
-sale_items
-customers
-suppliers
-branches
-payments
-⚡ Real-Time Features
+cd /home/akbar/Рабочий стол/Pos
 
-Using Django Channels + WebSockets:
+2. Bog‘liqliklarni o‘rnating:
 
-Live POS updates
-Stock synchronization
-Real-time sales dashboard
-Instant notifications
-🐳 DevOps & Deployment
+npm install
 
-Project fully containerized:
+3. Ishlab chiqish serverini ishga tushiring:
 
-Docker (backend, frontend, postgres)
-Nginx reverse proxy
-CI/CD ready structure
-Scripts:
-deploy.sh → production deployment
-backup.sh → database backup
-migrate.sh → migrations
-seed.sh → initial data
-🧱 Tech Stack
-Backend
-Django REST Framework
-Django ORM
-PostgreSQL
-Django Channels (WebSockets)
-Celery (background tasks)
-Frontend
-Next.js
-TypeScript
-TailwindCSS
-Zustand / Redux
-DevOps
-Docker
-Nginx
-Linux server
-📐 Design Principles
-Clean Architecture (DRF apps separation)
-Service Layer pattern
-Scalable modular design
-API-first architecture
-Real-time ready system
-🚀 Project Goal
+npm run dev
 
-Build a production-ready POS ecosystem that supports multi-branch retail businesses with real-time synchronization, analytics, and scalable architecture.
+4. Brauzeringizda quyidagiga tashrif buyuring:
 
-👨‍💻 Author
+http://localhost:5173
 
-SmartPOS-AI Team
+## Skriptlar
+
+- npm run dev — rivojlantirish serverini ishga tushiradi.
+- npm run build — ishlab chiqarish uchun paketlaydi.
+- npm run preview — qurilgan versiyani mahalliy serverda ko‘rsatadi.
+- npm run lint — ESLint orqali kodni tekshiradi.
+
+## Loyihaning tuzilishi
+
+- src/main.jsx — ilovani DOMga ulash.
+- src/App.jsx — marshrutlar va asosiy sahifalar.
+- src/components/layout — umumiy sahifa tartibi, Header va Sidebar.
+- src/pages — Dashboard, POS, Products, Inventory, CRM, Suppliers, PurchaseOrders, AIAnalytics, ExpireManagement, Reports, Settings.
+
+## Eslatma
+
+Bu README loyiha xususiyatlarini o‘zbek tilida tushunarli tarzda taqdim etadi. Agar kerak bo‘lsa, qo‘shimcha bo‘limlar yoki tavsiflarni ham yozib beraman.
