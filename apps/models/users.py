@@ -1,7 +1,22 @@
 import uuid
-
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models import ImageField, EmailField, CharField, UUIDField, BooleanField, TextChoices, DateTimeField
+from django.db.models import (
+    CharField, EmailField, UUIDField, BooleanField, TextChoices,
+    DateTimeField, ForeignKey, ImageField, SET_NULL, Model
+)
+
+class Branch(Model):
+    id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = CharField(max_length=255)
+    address = CharField(max_length=500, blank=True, null=True)
+    phone = CharField(max_length=20, blank=True, null=True)
+    created_at = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "branches"
+
+    def __str__(self):
+        return self.name
 
 
 class UserManager(BaseUserManager):
@@ -23,15 +38,20 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(TextChoices):
         ADMIN = "admin", "Admin"
+        OWNER = "owner", "Owner"
         MANAGER = "manager", "Manager"
+        CASHIER = "cashier", "Cashier"
 
     id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone = CharField(max_length=20, unique=True)
     email = EmailField(blank=True, null=True)
     first_name = CharField(max_length=100)
     last_name = CharField(max_length=100)
-    role = CharField(max_length=20, choices=Role.choices, default=Role.MANAGER)
+    role = CharField(max_length=20, choices=Role.choices, default=Role.CASHIER)
     avatar = ImageField(upload_to="avatars/", blank=True, null=True)
+    branch = ForeignKey(Branch, on_delete=SET_NULL, null=True, blank=True, related_name='employees')
+
+    telegram_id = CharField(max_length=30, blank=True, null=True, unique=True)
 
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
@@ -51,7 +71,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.full_name} ({self.role})"
+        return f"{self.full_name} ({self.get_role_display()})"
 
     @property
     def full_name(self):
