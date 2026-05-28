@@ -1,9 +1,7 @@
-from django.db import models
 from django.db.models import Model, ForeignKey, CASCADE, DecimalField, CharField, DateTimeField
 
 
 class Payment(Model):
-
     sale = ForeignKey("apps.Sale", on_delete=CASCADE)
 
     amount = DecimalField(max_digits=12, decimal_places=2)

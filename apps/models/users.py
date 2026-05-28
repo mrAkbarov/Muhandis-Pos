@@ -25,7 +25,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ADMIN = "admin", "Admin"
         MANAGER = "manager", "Manager"
 
-
     id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone = CharField(max_length=20, unique=True)
     email = EmailField(blank=True, null=True)
