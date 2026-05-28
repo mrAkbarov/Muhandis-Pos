@@ -1,9 +1,9 @@
-from django.db.models import ForeignKey, SET_NULL, DecimalField, BooleanField, DateTimeField, CharField, Model, \
-    PositiveIntegerField, CASCADE, TextField
+from django.db import models
+from django.db.models import Model, CharField, ForeignKey, DecimalField, PositiveIntegerField, DateTimeField
 
 
 class Category(Model):
-    name = CharField(max_length=255)
+    name = CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
@@ -11,44 +11,28 @@ class Category(Model):
 
 class Product(Model):
     name = CharField(max_length=255)
-    barcode = CharField(max_length=100, unique=True)
+    barcode = CharField(max_length=50, unique=True)  # Shtrix-kod (Rasmda nom ostida turibdi)
+    category = ForeignKey(Category, on_delete=PROTECT, related_name='products')
 
-    category = ForeignKey("apps.Category", on_delete=SET_NULL, null=True)
+    selling_price = DecimalField(max_digits=12, decimal_places=2)  # Narx
+    base_price = DecimalField(max_digits=12, decimal_places=2)  # Tannarx
 
-    price = DecimalField(max_digits=12, decimal_places=2)
-    cost_price = DecimalField(max_digits=12, decimal_places=2)
-
-    is_active = BooleanField(default=True)
-    is_draft = BooleanField(default=False)
+    stock = PositiveIntegerField(default=0)  # Stock (Omborda)
 
     created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
-class Inventory(Model):
-    branch = ForeignKey("apps.Branch", on_delete=CASCADE)
-    product = ForeignKey("apps.Product", on_delete=CASCADE)
-
-    quantity = PositiveIntegerField(default=0)
-
-    class Meta:
-        unique_together = ("branch", "product")
+    @property
+    def profit(self):
+        return self.selling_price - self.base_price
 
 
-class StockMovement(Model):
-    MOVEMENT_TYPES = (
-        ("in", "IN"),
-        ("out", "OUT"),
-    )
-
-    branch = ForeignKey("apps.Branch", on_delete=CASCADE)
-    product = ForeignKey("apps.Product", on_delete=CASCADE)
-
-    movement_type = CharField(max_length=10, choices=MOVEMENT_TYPES)
-    quantity = PositiveIntegerField()
-
-    note = TextField(blank=True)
-
-    created_at = DateTimeField(auto_now_add=True)
+    @property
+    def status(self):
+        if self.stock > 0:
+            return "Yetarli"
+        return "Tugagan"
