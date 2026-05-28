@@ -2,72 +2,9 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, Add, CalendarToday, ArrowBack, ArrowForward, Delete, Print } from '@mui/icons-material';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, InputLabel, Select, MenuItem, Autocomplete, IconButton } from '@mui/material';
+import { getProductConfig, typeLabels } from '../config/dealerProducts';
 
 const itemsPerPage = 5;
-
-const productConfig = {
-  1: { // Cola 1L
-    types: [
-      { value: 'shakarli', label: 'Shakarli' },
-      { value: 'shakarsiz', label: 'Shakarsiz' }
-    ],
-    sizes: ['0.5L', '1.0L', '1.5L', '2.0L']
-  },
-  2: { // Pepsi 1L
-    types: [
-      { value: 'shakarli', label: 'Shakarli' },
-      { value: 'shakarsiz', label: 'Shakarsiz' }
-    ],
-    sizes: ['0.5L', '1.0L', '1.5L', '2.0L']
-  },
-  3: { // Non (Tandir)
-    types: [
-      { value: 'tuzli', label: 'Tuzli' },
-      { value: 'tuzsiz', label: 'Tuzsiz' }
-    ],
-    sizes: ['300g', '500g']
-  },
-  4: { // Lay's Chips
-    types: [
-      { value: 'tuzli', label: 'Tuzli' },
-      { value: 'tuzsiz', label: 'Tuzsiz' }
-    ],
-    sizes: ['26g', '50g', '90g', '140g']
-  },
-  5: { // Snickers 50g
-    types: [
-      { value: 'standart', label: 'Standart' }
-    ],
-    sizes: ['50g', '80g']
-  },
-  6: { // Smetana 20%
-    types: [
-      { value: 'standart', label: 'Standart' }
-    ],
-    sizes: ['200g', '400g']
-  },
-  7: { // Qatiq
-    types: [
-      { value: 'standart', label: 'Standart' }
-    ],
-    sizes: ['500g', '1000g']
-  }
-};
-
-const defaultProductConfig = {
-  types: [
-    { value: 'standart', label: 'Standart' }
-  ],
-  sizes: ['1 ta', '5 ta', '10 ta']
-};
-
-const typeLabels = {
-  tuzli: 'Tuzli',
-  tuzsiz: 'Tuzsiz',
-  shakarli: 'Shakarli',
-  shakarsiz: 'Shakarsiz',
-  standart: 'Standart'
-};
 
 export default function DealerOrders() {
   const { dealerOrders, setDealerOrders, suppliers, getBusinessProducts, currentBusinessId } = useApp();
@@ -514,7 +451,7 @@ export default function DealerOrders() {
                 onChange={(event, newValue) => {
                   if (newValue) {
                     const pId = newValue.id;
-                    const config = productConfig[pId] || defaultProductConfig;
+                    const config = getProductConfig(pId);
                     setItemForm(prev => ({
                       ...prev,
                       productId: String(pId),
@@ -584,7 +521,7 @@ export default function DealerOrders() {
                   </div>
 
                   {(() => {
-                    const currentConfig = productConfig[parseInt(itemForm.productId, 10)] || defaultProductConfig;
+                    const currentConfig = getProductConfig(parseInt(itemForm.productId, 10));
                     return (
                       <div className="grid grid-cols-2 gap-3">
                         <FormControl fullWidth size="small" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 }, bgcolor: 'white' }}>

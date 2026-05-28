@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Search, Add, Remove, Delete, ShoppingCartCheckout,
   CategoryOutlined, CalendarToday, Assistant, ArrowBack, ArrowForward, Close
@@ -11,6 +12,8 @@ const itemsPerPage = 6;
 
 export default function POS() {
   const { getBusinessProducts, getProductStock, updateProductStock, setSales } = useApp();
+  const { currentUser } = useAuth();
+  const cashierName = currentUser?.name ?? 'Kassir';
   
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('Barchasi');
@@ -133,7 +136,7 @@ export default function POS() {
       items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
       amount: total,
       method: payMethod,
-      cashier: 'Akmaljon',
+      cashier: cashierName,
       businessId: activeProducts[0]?.businessId || 1
     };
 
@@ -156,7 +159,7 @@ export default function POS() {
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-gray-200">Kassir: <b className="text-white font-semibold">Akmaljon</b></span>
+            <span className="text-gray-200">Kassir: <b className="text-white font-semibold">{cashierName}</b></span>
           </div>
           <span className="text-indigo-400">|</span>
           <span className="text-gray-200 font-mono bg-white/10 px-2.5 py-1 rounded-lg font-bold">

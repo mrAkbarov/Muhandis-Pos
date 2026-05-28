@@ -10,7 +10,7 @@ import {
   FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox
 } from '@mui/material';
 
-const fmt = (n) => n.toLocaleString('uz-UZ') + " so'm";
+import { formatCurrency } from '../utils/format';
 
 const stockStatus = (qty) => {
   if (qty === 0) return { label: 'Tugagan', bg: '#fee2e2', color: '#ef4444' };
@@ -225,9 +225,9 @@ export default function Products() {
                       <TableCell>
                         <Chip label={p.category} size="small" sx={{ fontSize: 11, bgcolor: '#eef0ff', color: '#4361ee', fontWeight: 600 }} />
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#4361ee' }}>{fmt(p.price)}</TableCell>
-                      <TableCell sx={{ color: '#6b7280' }}>{fmt(p.cost)}</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#22c55e' }}>+{fmt(p.price - p.cost)}</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#4361ee' }}>{formatCurrency(p.price)}</TableCell>
+                      <TableCell sx={{ color: '#6b7280' }}>{formatCurrency(p.cost)}</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#22c55e' }}>+{formatCurrency(p.price - p.cost)}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>{stock} ta</TableCell>
                       <TableCell>
                         <Chip

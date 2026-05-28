@@ -1,40 +1,39 @@
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/layout/Layout';
-import Dashboard from './pages/Dashboard';
-import POS from './pages/POS';
-import Products from './pages/Products';
-import Inventory from './pages/Inventory';
-import Suppliers from './pages/Suppliers';
-import PurchaseOrders from './pages/PurchaseOrders';
-import AIAnalytics from './pages/AIAnalytics';
-import ExpireManagement from './pages/ExpireManagement';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import Agents from './pages/Agents';
-import DealerOrders from './pages/DealerOrders';
-import DealerReceipts from './pages/DealerReceipts';
+import AppRoutes from './routes/AppRoutes';
+import Login from './pages/Login';
+import { useAuth } from './context/AuthContext';
+import { getHomePath } from './config/roles';
 
-function App() {
+function AppShell() {
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/pos" element={<POS />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/suppliers" element={<Suppliers />} />
-        <Route path="/purchase-orders" element={<PurchaseOrders />} />
-        <Route path="/dilerlar/zakaz" element={<DealerOrders />} />
-        <Route path="/dilerlar/prixod" element={<DealerReceipts />} />
-        <Route path="/agents" element={<Agents />} />
-        <Route path="/ai-analytics" element={<AIAnalytics />} />
-        <Route path="/expire-management" element={<ExpireManagement />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
+      <AppRoutes />
     </Layout>
   );
 }
 
-export default App;
+export default function App() {
+  const { authReady, currentUser } = useAuth();
 
+  if (!authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f0f2f5' }}>
+        <p className="text-gray-500 text-sm">Yuklanmoqda...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={currentUser ? <Navigate to={getHomePath(currentUser.role)} replace /> : <Login />}
+      />
+      <Route
+        path="/*"
+        element={currentUser ? <AppShell /> : <Navigate to="/login" replace />}
+      />
+    </Routes>
+  );
+}

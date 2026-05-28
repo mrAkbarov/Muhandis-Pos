@@ -1,0 +1,65 @@
+import { ROLES } from './roles';
+
+/** Asosiy sidebar (yuqori qism) */
+export const NAV_MAIN = [
+  { path: '/', label: 'Dashboard', title: 'Dashboard', icon: 'dashboard', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { path: '/pos', label: 'POS', title: 'POS (Kassa)', icon: 'pos', roles: [ROLES.CASHIER] },
+  { path: '/products', label: 'Products', title: 'Products', icon: 'products', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { path: '/inventory', label: 'Sklad', title: 'Sklad', icon: 'inventory', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { path: '/agents', label: 'Agentlar', title: 'Agentlar', icon: 'agents', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+];
+
+/** Yig'iladigan guruhlar */
+export const NAV_GROUPS = [
+  {
+    id: 'dilerlar',
+    label: 'Dilerlar',
+    icon: 'suppliers',
+    roles: [ROLES.ADMIN],
+    children: [
+      { path: '/dilerlar/zakaz', label: 'Zakaz (Buyurtma)', title: 'Dilerlar — Zakaz', roles: [ROLES.ADMIN] },
+      { path: '/dilerlar/prixod', label: 'Prixod (Qabul)', title: 'Dilerlar — Prixod', roles: [ROLES.ADMIN] },
+    ],
+  },
+];
+
+/** Sidebar pastki qism */
+export const NAV_BOTTOM = [
+  { path: '/ai-analytics', label: 'AI Analytica', title: 'AI Analytica', icon: 'ai-analytics', roles: [ROLES.ADMIN] },
+  { path: '/expire-management', label: 'Yaroqlilik Mudati', title: 'Yaroqlilik Mudati', icon: 'expire', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { path: '/reports', label: 'Hisobot', title: 'Hisobot', icon: 'reports', roles: [ROLES.ADMIN] },
+  { path: '/settings', label: 'Sozlamalar', title: 'Sozlamalar', icon: 'settings', roles: [ROLES.ADMIN, ROLES.CASHIER] },
+];
+
+export const NAV_LEGACY = [
+  { path: '/suppliers', title: 'Dilerlar (eski)', roles: [ROLES.ADMIN] },
+  { path: '/purchase-orders', title: 'Purchase Orders', roles: [ROLES.ADMIN] },
+];
+
+const titleByPath = new Map(
+  [...NAV_MAIN, ...NAV_BOTTOM, ...NAV_LEGACY, ...NAV_GROUPS.flatMap((g) => g.children)].map(
+    (item) => [item.path, item.title ?? item.label]
+  )
+);
+
+export function getPageTitle(pathname) {
+  return titleByPath.get(pathname) ?? 'POS';
+}
+
+export function isDilerlarPath(pathname) {
+  return pathname.startsWith('/dilerlar');
+}
+
+export function filterByRole(items, role) {
+  if (!role) return [];
+  return items.filter((item) => item.roles?.includes(role));
+}
+
+export function filterGroupsByRole(groups, role) {
+  return filterByRole(groups, role)
+    .map((group) => ({
+      ...group,
+      children: filterByRole(group.children, role),
+    }))
+    .filter((group) => group.children.length > 0);
+}

@@ -4,7 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 
 export default defineConfig({
-  plugins: [react(),
+  plugins: [
+    react(),
     tailwindcss(),
   ],
+  css: {
+    devSourcemap: false,
+  },
 })

@@ -2,14 +2,8 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, LocalShipping, CalendarToday, ArrowBack, CheckCircle, WarningAmber } from '@mui/icons-material';
 import { Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, InputAdornment, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-
-const typeLabels = {
-  tuzli: 'Tuzli',
-  tuzsiz: 'Tuzsiz',
-  shakarli: 'Shakarli',
-  shakarsiz: 'Shakarsiz',
-  standart: 'Standart'
-};
+import { typeLabels } from '../config/dealerProducts';
+import { formatCurrency } from '../utils/format';
 
 export default function DealerReceipts() {
   const { dealerOrders, setDealerOrders, updateProductStock, activeBusinessWarehouses, selectedWarehouseId, setSelectedWarehouseId, currentBusinessId } = useApp();
@@ -70,8 +64,6 @@ export default function DealerReceipts() {
     alert("Prixod muvaffaqiyatli qabul qilindi va mahsulotlar skladga qo'shildi!");
     setActiveReceiptOrder(null);
   };
-
-  const fmt = (n) => n.toLocaleString('uz-UZ') + " so'm";
 
   if (activeReceiptOrder) {
     const item = activeReceiptOrder.items[0];
@@ -218,7 +210,7 @@ export default function DealerReceipts() {
                       <TableCell sx={{ fontWeight: 600 }}>{o.supplierName}</TableCell>
                       <TableCell>{item ? item.name : '—'}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>{item ? `${item.quantity} ta` : '—'}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#4361ee' }}>{fmt(o.total)}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#4361ee' }}>{formatCurrency(o.total)}</TableCell>
                       <TableCell sx={{ color: '#9ca3af' }}>{o.date}</TableCell>
                       <TableCell>
                         <Button
