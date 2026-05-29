@@ -1,9 +1,12 @@
 import uuid
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db.models import (
     CharField, EmailField, UUIDField, BooleanField, TextChoices,
     DateTimeField, ForeignKey, ImageField, SET_NULL, Model
 )
+
 
 class Branch(Model):
     id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -11,9 +14,6 @@ class Branch(Model):
     address = CharField(max_length=500, blank=True, null=True)
     phone = CharField(max_length=20, blank=True, null=True)
     created_at = DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "branches"
 
     def __str__(self):
         return self.name
@@ -32,6 +32,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("role", "admin")
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValidationError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValidationError("Superuser must have is_superuser=True.")
+
         return self.create_user(phone, password, **extra_fields)
 
 
@@ -51,8 +57,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     avatar = ImageField(upload_to="avatars/", blank=True, null=True)
     branch = ForeignKey(Branch, on_delete=SET_NULL, null=True, blank=True, related_name='employees')
 
-    telegram_id = CharField(max_length=30, blank=True, null=True, unique=True)
-
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
 
@@ -65,7 +69,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     class Meta:
-        db_table = "users"
         verbose_name = "User"
         verbose_name_plural = "Users"
         ordering = ["-created_at"]
@@ -76,3 +79,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
+
+    def clean(self):
+        super().clean()
+        if Branch.objects.exists():
+            if self.role in [self.Role.CASHIER, self.Role.MANAGER] and not self.branch:
+                raise ValidationError({
+                    "branch": f"{self.get_role_display()} roli uchun filial (branch) tanlanishi shart!"
+                })
+            if self.role == self.Role.ADMIN and self.branch:
+                raise ValidationError({
+                    "branch": "Admin biron bir filialga biriktirilishi mumkin emas (Tizim boshqaruvchisi)!"
+                })
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.role = self.Role.ADMIN
+
+        self.full_clean()
+        super().save(*args, **kwargs)

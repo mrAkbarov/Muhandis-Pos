@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models import Product, Category
+from apps.models import Branch, Category, Product
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -29,3 +29,18 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.status  # Modeldagi statusni (Yetarli/Tugagan) oladi
+
+
+class BranchModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ('id', 'name', 'address', 'phone', 'created_at')
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'created_at': {'read_only': True}
+        }
+
+    def validate_phone(self, value):
+        if value and not value.startswith('+'):
+            raise serializers.ValidationError("Telefon raqam xalqaro formatda bo'lishi shart (Masalan: +998...)")
+        return value

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Model, CharField, ForeignKey, DecimalField, PositiveIntegerField, DateTimeField
+from django.db.models import Model, CharField, ForeignKey, DecimalField, PositiveIntegerField, DateTimeField, PROTECT
 
 
 class Category(Model):
@@ -11,14 +11,13 @@ class Category(Model):
 
 class Product(Model):
     name = CharField(max_length=255)
-    barcode = CharField(max_length=50, unique=True)  # Shtrix-kod (Rasmda nom ostida turibdi)
+    barcode = CharField(max_length=50, unique=True)
     category = ForeignKey(Category, on_delete=PROTECT, related_name='products')
 
     selling_price = DecimalField(max_digits=12, decimal_places=2)  # Narx
     base_price = DecimalField(max_digits=12, decimal_places=2)  # Tannarx
 
-    stock = PositiveIntegerField(default=0)  # Stock (Omborda)
-
+    stock = PositiveIntegerField(default=0)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
