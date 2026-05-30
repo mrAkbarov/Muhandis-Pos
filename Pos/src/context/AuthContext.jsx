@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { ROLES } from '../config/roles';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { ROLES, isAdmin } from '../config/roles';
+import { getPermissions, canManageUsers } from '../config/permissions';
 import { defaultUsers } from '../data/initialUsers';
 
 const USERS_KEY = 'pos_users';
@@ -7,14 +8,33 @@ const SESSION_KEY = 'pos_session_user_id';
 
 const AuthContext = createContext(null);
 
-function loadUsers() {
-  const stored = localStorage.getItem(USERS_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      /* ignore */
+function mergeDefaultUsers(existing) {
+  const byUsername = new Map(existing.map((u) => [u.username.toLowerCase(), u]));
+  let changed = false;
+  for (const du of defaultUsers) {
+    if (!byUsername.has(du.username.toLowerCase())) {
+      byUsername.set(du.username.toLowerCase(), du);
+      changed = true;
     }
+  }
+  return changed ? [...byUsername.values()] : existing;
+}
+
+function loadUsers() {
+  try {
+    const stored = localStorage.getItem(USERS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const merged = mergeDefaultUsers(parsed);
+        if (merged.length !== parsed.length) {
+          localStorage.setItem(USERS_KEY, JSON.stringify(merged));
+        }
+        return merged;
+      }
+    }
+  } catch {
+    /* ignore */
   }
   localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
   return defaultUsers;
@@ -62,10 +82,13 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(SESSION_KEY);
   }, []);
 
-  const addCashier = useCallback(({ username, password, name }) => {
+  const addUser = useCallback(({ username, password, name, role }) => {
     const un = username.trim().toLowerCase();
     if (!un || !password || !name?.trim()) {
       return { ok: false, error: "Barcha maydonlarni to'ldiring" };
+    }
+    if (!Object.values(ROLES).includes(role)) {
+      return { ok: false, error: 'Rol tanlanmagan' };
     }
     if (users.some((u) => u.username.toLowerCase() === un)) {
       return { ok: false, error: 'Bu login band' };
@@ -75,21 +98,38 @@ export function AuthProvider({ children }) {
       username: un,
       password,
       name: name.trim(),
-      role: ROLES.CASHIER,
+      role,
       active: true,
     };
     setUsers((prev) => [...prev, newUser]);
     return { ok: true };
   }, [users]);
 
-  const toggleCashierActive = useCallback((userId, active) => {
+  const addCashier = useCallback((form) => addUser({ ...form, role: ROLES.CASHIER }), [addUser]);
+
+  const updateUserRole = useCallback((userId, role) => {
+    if (!Object.values(ROLES).includes(role)) {
+      return { ok: false, error: 'Noto\'g\'ri rol' };
+    }
     setUsers((prev) =>
-      prev.map((u) => (u.id === userId && u.role === ROLES.CASHIER ? { ...u, active } : u))
+      prev.map((u) => (u.id === userId ? { ...u, role } : u))
+    );
+    if (currentUser?.id === userId) {
+      setCurrentUser((u) => ({ ...u, role }));
+    }
+    return { ok: true };
+  }, [currentUser]);
+
+  const toggleUserActive = useCallback((userId, active) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, active } : u))
     );
     if (currentUser?.id === userId && !active) {
       logout();
     }
   }, [currentUser, logout]);
+
+  const toggleCashierActive = toggleUserActive;
 
   const updateOwnPassword = useCallback((currentPassword, newPassword) => {
     if (!currentUser) return { ok: false, error: 'Kirmagansiz' };
@@ -106,7 +146,12 @@ export function AuthProvider({ children }) {
     return { ok: true };
   }, [currentUser]);
 
-  const cashiers = users.filter((u) => u.role === ROLES.CASHIER);
+  const permissions = useMemo(
+    () => getPermissions(currentUser?.role),
+    [currentUser?.role]
+  );
+
+  const staffUsers = users.filter((u) => u.id !== currentUser?.id || true);
 
   return (
     <AuthContext.Provider
@@ -114,14 +159,20 @@ export function AuthProvider({ children }) {
         authReady,
         currentUser,
         users,
-        cashiers,
+        staffUsers,
+        cashiers: users.filter((u) => u.role === ROLES.CASHIER),
+        permissions,
         login,
         logout,
+        addUser,
         addCashier,
+        updateUserRole,
+        toggleUserActive,
         toggleCashierActive,
         updateOwnPassword,
-        isAdmin: currentUser?.role === ROLES.ADMIN,
+        isAdmin: isAdmin(currentUser),
         isCashier: currentUser?.role === ROLES.CASHIER,
+        canManageUsers: canManageUsers(currentUser?.role),
       }}
     >
       {children}

@@ -1,28 +1,35 @@
 export const ROLES = {
   ADMIN: 'admin',
+  BOSS: 'boss',
+  MANAGER: 'manager',
   CASHIER: 'cashier',
 };
 
 export const ROLE_LABELS = {
-  [ROLES.ADMIN]: 'Administrator',
+  [ROLES.ADMIN]: 'Tizim Administratori',
+  [ROLES.BOSS]: 'Biznes Egasi (Boss)',
+  [ROLES.MANAGER]: 'Boshqaruvchi (Manager)',
   [ROLES.CASHIER]: 'Kassir',
 };
 
+const OPS_STAFF = [ROLES.ADMIN, ROLES.BOSS, ROLES.MANAGER];
+const FINANCE_STAFF = [ROLES.ADMIN, ROLES.BOSS];
+
 /** Marshrut → ruxsat berilgan rollar */
 export const ROUTE_ROLES = {
-  '/': [ROLES.ADMIN, ROLES.CASHIER],
+  '/': OPS_STAFF,
   '/pos': [ROLES.CASHIER],
-  '/products': [ROLES.ADMIN, ROLES.CASHIER],
-  '/inventory': [ROLES.ADMIN, ROLES.CASHIER],
-  '/agents': [ROLES.ADMIN, ROLES.CASHIER],
-  '/dilerlar/zakaz': [ROLES.ADMIN],
-  '/dilerlar/prixod': [ROLES.ADMIN],
+  '/products': [ROLES.ADMIN, ROLES.BOSS, ROLES.MANAGER, ROLES.CASHIER],
+  '/inventory': OPS_STAFF,
+  '/agents': OPS_STAFF,
+  '/dilerlar/zakaz': OPS_STAFF,
+  '/dilerlar/prixod': OPS_STAFF,
   '/suppliers': [ROLES.ADMIN],
   '/purchase-orders': [ROLES.ADMIN],
-  '/ai-analytics': [ROLES.ADMIN],
-  '/expire-management': [ROLES.ADMIN, ROLES.CASHIER],
-  '/reports': [ROLES.ADMIN],
-  '/settings': [ROLES.ADMIN, ROLES.CASHIER],
+  '/ai-analytics': FINANCE_STAFF,
+  '/expire-management': OPS_STAFF,
+  '/reports': OPS_STAFF,
+  '/settings': [ROLES.ADMIN, ROLES.BOSS],
 };
 
 export function canAccessRoute(role, pathname) {
@@ -36,7 +43,8 @@ export function canAccessRoute(role, pathname) {
 }
 
 export function getHomePath(role) {
-  return role === ROLES.CASHIER ? '/pos' : '/';
+  if (role === ROLES.CASHIER) return '/pos';
+  return '/';
 }
 
 export function hasRole(user, role) {
@@ -45,4 +53,12 @@ export function hasRole(user, role) {
 
 export function isAdmin(user) {
   return hasRole(user, ROLES.ADMIN);
+}
+
+export function isBoss(user) {
+  return hasRole(user, ROLES.BOSS);
+}
+
+export function canManageSystem(user) {
+  return isAdmin(user);
 }

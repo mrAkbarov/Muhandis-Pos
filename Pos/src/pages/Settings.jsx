@@ -6,33 +6,41 @@ import {
 import {
   Switch, Button, TextField, Avatar, Alert, Chip,
   Table, TableBody, TableCell, TableHead, TableRow, IconButton,
+  MenuItem, Select, FormControl, InputLabel,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { ROLES, ROLE_LABELS } from '../config/roles';
 
 const allSections = [
-  { id: 'market', label: "Market Ma'lumotlari", icon: <Store fontSize="small" />, roles: [ROLES.ADMIN] },
-  { id: 'cashiers', label: 'Kassirlar', icon: <GroupAdd fontSize="small" />, roles: [ROLES.ADMIN] },
-  { id: 'profile', label: 'Profil', icon: <Person fontSize="small" />, roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { id: 'market', label: "Market Ma'lumotlari", icon: <Store fontSize="small" />, roles: [ROLES.ADMIN], readOnlyRoles: [ROLES.BOSS] },
+  { id: 'users', label: 'Xodimlar', icon: <GroupAdd fontSize="small" />, roles: [ROLES.ADMIN] },
+  { id: 'profile', label: 'Profil', icon: <Person fontSize="small" />, roles: [ROLES.ADMIN, ROLES.BOSS] },
   { id: 'notifications', label: 'Bildirishnomalar', icon: <Notifications fontSize="small" />, roles: [ROLES.ADMIN] },
-  { id: 'security', label: 'Xavfsizlik', icon: <Security fontSize="small" />, roles: [ROLES.ADMIN, ROLES.CASHIER] },
+  { id: 'security', label: 'Xavfsizlik', icon: <Security fontSize="small" />, roles: [ROLES.ADMIN, ROLES.BOSS] },
   { id: 'appearance', label: "Ko'rinish", icon: <Palette fontSize="small" />, roles: [ROLES.ADMIN] },
   { id: 'receipt', label: 'Kvitansiya', icon: <Receipt fontSize="small" />, roles: [ROLES.ADMIN] },
 ];
 
 const btnSx = { bgcolor: '#4361ee', borderRadius: 1.5, textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#3451d1' } };
 
+const ASSIGNABLE_ROLES = [ROLES.BOSS, ROLES.MANAGER, ROLES.CASHIER];
+
 export default function Settings() {
   const {
     currentUser,
-    isAdmin,
-    cashiers,
-    addCashier,
-    toggleCashierActive,
+    permissions,
+    users,
+    addUser,
+    updateUserRole,
+    toggleUserActive,
     updateOwnPassword,
   } = useAuth();
 
-  const sections = allSections.filter((s) => s.roles.includes(currentUser?.role));
+  const isMarketReadOnly = permissions.viewMarketReadOnly;
+
+  const sections = allSections.filter(
+    (s) => s.roles.includes(currentUser?.role) || s.readOnlyRoles?.includes(currentUser?.role)
+  );
   const [activeSection, setActiveSection] = useState(sections[0]?.id ?? 'profile');
   const [darkMode, setDarkMode] = useState(false);
   const [notifs, setNotifs] = useState({ lowStock: true, expire: true, dailyReport: false, orders: true });
@@ -45,21 +53,21 @@ export default function Settings() {
     currency: "so'm",
   });
 
-  const [cashierForm, setCashierForm] = useState({ username: '', password: '', name: '' });
-  const [cashierMsg, setCashierMsg] = useState({ type: '', text: '' });
+  const [userForm, setUserForm] = useState({ username: '', password: '', name: '', role: ROLES.CASHIER });
+  const [userMsg, setUserMsg] = useState({ type: '', text: '' });
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
 
-  const handleAddCashier = () => {
-    const result = addCashier(cashierForm);
+  const handleAddUser = () => {
+    const result = addUser(userForm);
     if (result.ok) {
-      setCashierForm({ username: '', password: '', name: '' });
-      setCashierMsg({ type: 'success', text: "Kassir qo'shildi" });
+      setUserForm({ username: '', password: '', name: '', role: ROLES.CASHIER });
+      setUserMsg({ type: 'success', text: "Xodim qo'shildi" });
     } else {
-      setCashierMsg({ type: 'error', text: result.error });
+      setUserMsg({ type: 'error', text: result.error });
     }
   };
 
@@ -84,7 +92,11 @@ export default function Settings() {
       <div>
         <h1 className="text-xl font-bold text-gray-800">Sozlamalar</h1>
         <p className="text-sm text-gray-500">
-          {isAdmin ? 'Tizim va kassirlarni boshqarish' : 'Profil va xavfsizlik'}
+          {permissions.manageUsers
+            ? 'Tizim va xodimlarni boshqarish'
+            : isMarketReadOnly
+              ? "Do'kon ma'lumotlari va profil"
+              : 'Profil va xavfsizlik'}
         </p>
       </div>
 
@@ -108,9 +120,12 @@ export default function Settings() {
         </div>
 
         <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
-          {activeSection === 'market' && isAdmin && (
+          {activeSection === 'market' && (permissions.systemSettings || isMarketReadOnly) && (
             <div>
-              <h2 className="text-base font-bold text-gray-800 mb-4">Market Ma'lumotlari</h2>
+              <h2 className="text-base font-bold text-gray-800 mb-1">Market Ma'lumotlari</h2>
+              {isMarketReadOnly && (
+                <p className="text-sm text-gray-500 mb-4">Faqat ko'rish rejimi</p>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { label: 'Market nomi', field: 'name' },
@@ -124,6 +139,7 @@ export default function Settings() {
                     value={market[field]}
                     onChange={(e) => setMarket((m) => ({ ...m, [field]: e.target.value }))}
                     size="small"
+                    disabled={isMarketReadOnly}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                   />
                 ))}
@@ -133,6 +149,7 @@ export default function Settings() {
                   value={market.taxRate}
                   onChange={(e) => setMarket((m) => ({ ...m, taxRate: e.target.value }))}
                   size="small"
+                  disabled={isMarketReadOnly}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                 />
                 <TextField
@@ -140,52 +157,68 @@ export default function Settings() {
                   value={market.currency}
                   onChange={(e) => setMarket((m) => ({ ...m, currency: e.target.value }))}
                   size="small"
+                  disabled={isMarketReadOnly}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                 />
               </div>
-              <Button variant="contained" sx={{ mt: 4, ...btnSx }}>Saqlash</Button>
+              {!isMarketReadOnly && (
+                <Button variant="contained" sx={{ mt: 4, ...btnSx }}>Saqlash</Button>
+              )}
             </div>
           )}
 
-          {activeSection === 'cashiers' && isAdmin && (
+          {activeSection === 'users' && permissions.manageUsers && (
             <div>
-              <h2 className="text-base font-bold text-gray-800 mb-1">Kassirlar</h2>
-              <p className="text-sm text-gray-500 mb-4">Faqat administrator yangi kassir qo'sha oladi</p>
+              <h2 className="text-base font-bold text-gray-800 mb-1">Xodimlar</h2>
+              <p className="text-sm text-gray-500 mb-4">Rol biriktirish va yangi xodim qo'shish (faqat Admin)</p>
 
-              {cashierMsg.text && (
-                <Alert severity={cashierMsg.type} sx={{ mb: 3 }} onClose={() => setCashierMsg({ type: '', text: '' })}>
-                  {cashierMsg.text}
+              {userMsg.text && (
+                <Alert severity={userMsg.type} sx={{ mb: 3 }} onClose={() => setUserMsg({ type: '', text: '' })}>
+                  {userMsg.text}
                 </Alert>
               )}
 
               <div className="p-4 border border-gray-100 rounded-xl mb-6">
-                <h3 className="text-sm font-bold text-gray-700 mb-3">Yangi kassir</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <h3 className="text-sm font-bold text-gray-700 mb-3">Yangi xodim</h3>
+                <div className="grid grid-cols-2 gap-3">
                   <TextField
                     label="Login"
-                    value={cashierForm.username}
-                    onChange={(e) => setCashierForm((f) => ({ ...f, username: e.target.value }))}
+                    value={userForm.username}
+                    onChange={(e) => setUserForm((f) => ({ ...f, username: e.target.value }))}
                     size="small"
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                   />
                   <TextField
                     label="Parol"
                     type="password"
-                    value={cashierForm.password}
-                    onChange={(e) => setCashierForm((f) => ({ ...f, password: e.target.value }))}
+                    value={userForm.password}
+                    onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))}
                     size="small"
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                   />
                   <TextField
                     label="Ism"
-                    value={cashierForm.name}
-                    onChange={(e) => setCashierForm((f) => ({ ...f, name: e.target.value }))}
+                    value={userForm.name}
+                    onChange={(e) => setUserForm((f) => ({ ...f, name: e.target.value }))}
                     size="small"
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                   />
+                  <FormControl size="small" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}>
+                    <InputLabel id="new-user-role">Rol</InputLabel>
+                    <Select
+                      labelId="new-user-role"
+                      label="Rol"
+                      value={userForm.role}
+                      onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value }))}
+                    >
+                      {ASSIGNABLE_ROLES.map((r) => (
+                        <MenuItem key={r} value={r}>{ROLE_LABELS[r]}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </div>
-                <Button variant="contained" startIcon={<GroupAdd />} onClick={handleAddCashier} sx={{ mt: 3, ...btnSx }}>
-                  Kassir qo'shish
+                <Button variant="contained" startIcon={<GroupAdd />} onClick={handleAddUser} sx={{ mt: 3, ...btnSx }}>
+                  Xodim qo'shish
                 </Button>
               </div>
 
@@ -194,34 +227,53 @@ export default function Settings() {
                   <TableRow sx={{ '& th': { fontWeight: 700, fontSize: 12, color: '#6b7280' } }}>
                     <TableCell>Login</TableCell>
                     <TableCell>Ism</TableCell>
+                    <TableCell>Rol</TableCell>
                     <TableCell>Holat</TableCell>
                     <TableCell align="right">Amal</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cashiers.map((c) => (
-                    <TableRow key={c.id} hover>
-                      <TableCell sx={{ fontSize: 13 }}>{c.username}</TableCell>
-                      <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{c.name}</TableCell>
+                  {users.map((u) => (
+                    <TableRow key={u.id} hover>
+                      <TableCell sx={{ fontSize: 13 }}>{u.username}</TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{u.name}</TableCell>
+                      <TableCell>
+                        {u.id === currentUser?.id || u.role === ROLES.ADMIN ? (
+                          <Chip label={ROLE_LABELS[u.role]} size="small" sx={{ fontSize: 11 }} />
+                        ) : (
+                          <Select
+                            size="small"
+                            value={u.role}
+                            onChange={(e) => updateUserRole(u.id, e.target.value)}
+                            sx={{ fontSize: 12, minWidth: 140 }}
+                          >
+                            {ASSIGNABLE_ROLES.map((r) => (
+                              <MenuItem key={r} value={r} sx={{ fontSize: 12 }}>{ROLE_LABELS[r]}</MenuItem>
+                            ))}
+                          </Select>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Chip
-                          label={c.active ? 'Faol' : 'Nofaol'}
+                          label={u.active ? 'Faol' : 'Nofaol'}
                           size="small"
                           sx={{
                             fontSize: 11,
-                            bgcolor: c.active ? '#f0fdf4' : '#fee2e2',
-                            color: c.active ? '#22c55e' : '#ef4444',
+                            bgcolor: u.active ? '#f0fdf4' : '#fee2e2',
+                            color: u.active ? '#22c55e' : '#ef4444',
                           }}
                         />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleCashierActive(c.id, !c.active)}
-                          title={c.active ? 'Nofaol qilish' : 'Faollashtirish'}
-                        >
-                          <Delete style={{ fontSize: 16, color: c.active ? '#9ca3af' : '#22c55e' }} />
-                        </IconButton>
+                        {u.id !== currentUser?.id && u.role !== ROLES.ADMIN && (
+                          <IconButton
+                            size="small"
+                            onClick={() => toggleUserActive(u.id, !u.active)}
+                            title={u.active ? 'Nofaol qilish' : 'Faollashtirish'}
+                          >
+                            <Delete style={{ fontSize: 16, color: u.active ? '#9ca3af' : '#22c55e' }} />
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -246,7 +298,7 @@ export default function Settings() {
             </div>
           )}
 
-          {activeSection === 'notifications' && isAdmin && (
+          {activeSection === 'notifications' && permissions.systemSettings && (
             <div>
               <h2 className="text-base font-bold text-gray-800 mb-4">Bildirishnomalar</h2>
               <div className="space-y-4">
@@ -312,7 +364,7 @@ export default function Settings() {
             </div>
           )}
 
-          {activeSection === 'appearance' && isAdmin && (
+          {activeSection === 'appearance' && permissions.systemSettings && (
             <div>
               <h2 className="text-base font-bold text-gray-800 mb-4">Ko'rinish</h2>
               <div className="flex items-center justify-between p-4 border border-gray-100 rounded-xl max-w-md">
@@ -329,7 +381,7 @@ export default function Settings() {
             </div>
           )}
 
-          {activeSection === 'receipt' && isAdmin && (
+          {activeSection === 'receipt' && permissions.systemSettings && (
             <div>
               <h2 className="text-base font-bold text-gray-800 mb-4">Kvitansiya</h2>
               <div className="grid grid-cols-2 gap-4 max-w-lg">

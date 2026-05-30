@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Add, Search, Edit, Delete, FilterList, ArrowBack, ArrowForward,
 } from '@mui/icons-material';
@@ -19,6 +20,9 @@ const stockStatus = (qty) => {
 };
 
 export default function Products() {
+  const { permissions } = useAuth();
+  const canEdit = permissions.editProducts;
+  const showCost = permissions.viewProductCost;
   const {
     getBusinessProducts,
     categories,
@@ -129,17 +133,21 @@ export default function Products() {
         <div>
           <h1 className="text-xl font-bold text-gray-800">Mahsulotlar</h1>
           <p className="text-sm text-gray-500">
-            Jami {businessProducts.length} ta mahsulot
+            {canEdit
+              ? `Jami ${businessProducts.length} ta mahsulot`
+              : `Qidiruv — ${businessProducts.length} ta mahsulot (faqat ko'rish)`}
           </p>
         </div>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={openAdd}
-          sx={{ bgcolor: '#4361ee', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#3451d1' } }}
-        >
-          Mahsulot qo'shish
-        </Button>
+        {canEdit && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={openAdd}
+            sx={{ bgcolor: '#4361ee', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#3451d1' } }}
+          >
+            Mahsulot qo'shish
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -173,8 +181,8 @@ export default function Products() {
                 <TableCell>Mahsulot</TableCell>
                 <TableCell>Kategoriya</TableCell>
                 <TableCell>Narx</TableCell>
-                <TableCell>Tannarx</TableCell>
-                <TableCell>Foyda</TableCell>
+                {showCost && <TableCell>Tannarx</TableCell>}
+                {showCost && <TableCell>Foyda</TableCell>}
                 <TableCell>Stock (Omborda)</TableCell>
                 <TableCell>Holat</TableCell>
               </TableRow>
@@ -182,7 +190,7 @@ export default function Products() {
             <TableBody>
               {paginatedProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 4, color: '#9ca3af' }}>
+                  <TableCell colSpan={showCost ? 8 : 6} align="center" sx={{ py: 4, color: '#9ca3af' }}>
                     Mahsulotlar topilmadi
                   </TableCell>
                 </TableRow>
@@ -194,8 +202,8 @@ export default function Products() {
                     <TableRow
                       key={p.id}
                       hover
-                      onClick={() => openEdit(p)}
-                      style={{ cursor: 'pointer' }}
+                      onClick={canEdit ? () => openEdit(p) : undefined}
+                      style={{ cursor: canEdit ? 'pointer' : 'default' }}
                       sx={{ 
                         '& td': { py: 1.5, fontSize: 13 },
                         bgcolor: i % 2 === 0 ? '#ffffff' : '#f4f9ff',
@@ -226,8 +234,10 @@ export default function Products() {
                         <Chip label={p.category} size="small" sx={{ fontSize: 11, bgcolor: '#eef0ff', color: '#4361ee', fontWeight: 600 }} />
                       </TableCell>
                       <TableCell sx={{ fontWeight: 600, color: '#4361ee' }}>{formatCurrency(p.price)}</TableCell>
-                      <TableCell sx={{ color: '#6b7280' }}>{formatCurrency(p.cost)}</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#22c55e' }}>+{formatCurrency(p.price - p.cost)}</TableCell>
+                      {showCost && <TableCell sx={{ color: '#6b7280' }}>{formatCurrency(p.cost)}</TableCell>}
+                      {showCost && (
+                        <TableCell sx={{ fontWeight: 600, color: '#22c55e' }}>+{formatCurrency(p.price - p.cost)}</TableCell>
+                      )}
                       <TableCell sx={{ fontWeight: 600 }}>{stock} ta</TableCell>
                       <TableCell>
                         <Chip
@@ -275,7 +285,8 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Dialog */}
+      {/* Dialog — faqat tahrirlash huquqi bo'lsa */}
+      {canEdit && (
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, fontSize: 18, borderBottom: '1px solid #f1f5f9', pb: 2 }}>
           {editProduct ? "Mahsulotni tahrirlash" : "Yangi mahsulot qo'shish"}
@@ -392,6 +403,7 @@ export default function Products() {
           </Button>
         </DialogActions>
       </Dialog>
+      )}
     </div>
   );
 }

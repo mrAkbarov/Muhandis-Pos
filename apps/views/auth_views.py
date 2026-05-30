@@ -7,7 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.models import User
-from serializers.auth_serializers import LoginModelSerializer, RegisterModelSerializer
+from apps.serializers.auth_serializers import RegisterModelSerializer, LoginModelSerializer
 
 
 @extend_schema(tags=['Auth'])

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   ShoppingCart,
   AttachMoney,
@@ -133,67 +134,91 @@ function StatCard({ icon, iconBg, title, value, sub, subColor, subText }) {
 
 // ─── Main Dashboard ───────────────────────────────────────────
 export default function Dashboard() {
+  const { permissions, currentUser } = useAuth();
+  const showProfit = permissions.viewProfit;
   const [chartPeriod, setChartPeriod] = useState('7 kunlik');
   const [topPeriod, setTopPeriod] = useState('Bugun');
   const [profitView, setProfitView] = useState('Grafik');
+
+  const statCards = [
+    {
+      key: 'sales',
+      icon: <ShoppingCart style={{ color: '#4361ee', fontSize: 22 }} />,
+      iconBg: '#eef0ff',
+      title: 'Bugungi Sotuv',
+      value: "12,450,000 so'm",
+      sub: '+ 18.5%',
+      subColor: '#16a34a',
+      subText: 'Kecha bilan solishtirganda',
+    },
+    ...(showProfit
+      ? [{
+          key: 'profit',
+          icon: <AttachMoney style={{ color: '#22c55e', fontSize: 22 }} />,
+          iconBg: '#f0fdf4',
+          title: 'Umumiy Foyda',
+          value: "3,250,000 so'm",
+          sub: '+ 22.1%',
+          subColor: '#16a34a',
+          subText: 'Kecha bilan solishtirganda',
+        }]
+      : []),
+    {
+      key: 'products',
+      icon: <Inventory2 style={{ color: '#3b82f6', fontSize: 22 }} />,
+      iconBg: '#eff6ff',
+      title: 'Jami Mahsulotlar',
+      value: '1,234',
+      sub: '+ 6 ta',
+      subColor: '#3b82f6',
+      subText: "Yangi qo'shildi",
+    },
+    {
+      key: 'lowStock',
+      icon: <Warning style={{ color: '#f97316', fontSize: 22 }} />,
+      iconBg: '#fff7ed',
+      title: 'Kam Qolgan Mahsulotlar',
+      value: '23',
+      sub: '▲ Ogohlantirish',
+      subColor: '#f97316',
+      subText: '',
+    },
+    {
+      key: 'expired',
+      icon: <EventBusy style={{ color: '#ef4444', fontSize: 22 }} />,
+      iconBg: '#fff1f2',
+      title: "Muddati O'tganlar",
+      value: '7',
+      sub: '▲ Darhol tekshirish kerak',
+      subColor: '#ef4444',
+      subText: '',
+    },
+  ];
 
   return (
     <div className="space-y-5">
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">
-          Xush kelibsiz, Akmaljon! 👋
+          Xush kelibsiz, {currentUser?.name?.split(' ')[0] ?? 'Foydalanuvchi'}! 👋
         </h1>
         <p className="text-sm text-gray-500 mt-0.5">Bugungi umumiy ko'rsatkichlar</p>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-5 gap-4">
-        <StatCard
-          icon={<ShoppingCart style={{ color: '#4361ee', fontSize: 22 }} />}
-          iconBg="#eef0ff"
-          title="Bugungi Sotuv"
-          value="12,450,000 so'm"
-          sub="+ 18.5%"
-          subColor="#16a34a"
-          subText="Kecha bilan solishtirganda"
-        />
-        <StatCard
-          icon={<AttachMoney style={{ color: '#22c55e', fontSize: 22 }} />}
-          iconBg="#f0fdf4"
-          title="Umumiy Foyda"
-          value="3,250,000 so'm"
-          sub="+ 22.1%"
-          subColor="#16a34a"
-          subText="Kecha bilan solishtirganda"
-        />
-        <StatCard
-          icon={<Inventory2 style={{ color: '#3b82f6', fontSize: 22 }} />}
-          iconBg="#eff6ff"
-          title="Jami Mahsulotlar"
-          value="1,234"
-          sub="+ 6 ta"
-          subColor="#3b82f6"
-          subText="Yangi qo'shildi"
-        />
-        <StatCard
-          icon={<Warning style={{ color: '#f97316', fontSize: 22 }} />}
-          iconBg="#fff7ed"
-          title="Kam Qolgan Mahsulotlar"
-          value="23"
-          sub="▲ Ogohlantirish"
-          subColor="#f97316"
-          subText=""
-        />
-        <StatCard
-          icon={<EventBusy style={{ color: '#ef4444', fontSize: 22 }} />}
-          iconBg="#fff1f2"
-          title="Muddati O'tganlar"
-          value="7"
-          sub="▲ Darhol tekshirish kerak"
-          subColor="#ef4444"
-          subText=""
-        />
+      <div className={`grid gap-4 ${statCards.length >= 5 ? 'grid-cols-5' : 'grid-cols-4'}`}>
+        {statCards.map((card) => (
+          <StatCard
+            key={card.key}
+            icon={card.icon}
+            iconBg={card.iconBg}
+            title={card.title}
+            value={card.value}
+            sub={card.sub}
+            subColor={card.subColor}
+            subText={card.subText}
+          />
+        ))}
       </div>
 
       {/* Row 2: Chart + Top Products + AI Insight */}
@@ -359,7 +384,7 @@ export default function Dashboard() {
       </div>
 
       {/* Row 4: Auto Order + Profit/Loss */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${showProfit ? 'grid-cols-2' : 'grid-cols-1'}`}>
         {/* Auto Orders */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <h2 className="text-sm font-bold text-gray-700 mb-3">Auto Order Tavsiyalar</h2>
@@ -404,55 +429,56 @@ export default function Dashboard() {
           </table>
         </div>
 
-        {/* Profit/Loss */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-gray-700">Foyda / Zarar Tahlili</h2>
-            <Select
-              value={profitView}
-              onChange={(e) => setProfitView(e.target.value)}
-              size="small"
-              sx={{ fontSize: 12, height: 28, minWidth: 80 }}
-            >
-              <MenuItem value="Grafik" sx={{ fontSize: 12 }}>Grafik</MenuItem>
-              <MenuItem value="Jadval" sx={{ fontSize: 12 }}>Jadval</MenuItem>
-            </Select>
-          </div>
-          <div className="space-y-3">
-            {profitLoss.map((item, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-gray-700">{item.product}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">
-                      {(item.sotuv / 1000000).toFixed(1)}M so'm
-                    </span>
-                    <span
-                      className="text-xs font-bold"
-                      style={{ color: item.positive ? '#22c55e' : '#ef4444' }}
-                    >
-                      {item.positive ? '+' : ''}
-                      {(item.profit / 1000000).toFixed(1)}M so'm
-                    </span>
+        {showProfit && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-gray-700">Foyda / Zarar Tahlili</h2>
+              <Select
+                value={profitView}
+                onChange={(e) => setProfitView(e.target.value)}
+                size="small"
+                sx={{ fontSize: 12, height: 28, minWidth: 80 }}
+              >
+                <MenuItem value="Grafik" sx={{ fontSize: 12 }}>Grafik</MenuItem>
+                <MenuItem value="Jadval" sx={{ fontSize: 12 }}>Jadval</MenuItem>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              {profitLoss.map((item, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">{item.product}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-400">
+                        {(item.sotuv / 1000000).toFixed(1)}M so'm
+                      </span>
+                      <span
+                        className="text-xs font-bold"
+                        style={{ color: item.positive ? '#22c55e' : '#ef4444' }}
+                      >
+                        {item.positive ? '+' : ''}
+                        {(item.profit / 1000000).toFixed(1)}M so'm
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <LinearProgress
-                  variant="determinate"
-                  value={item.positive ? Math.min((item.profit / item.sotuv) * 100 + 40, 100) : 20}
-                  sx={{
-                    height: 6,
-                    borderRadius: 3,
-                    bgcolor: '#f3f4f6',
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: item.positive ? '#22c55e' : '#ef4444',
+                  <LinearProgress
+                    variant="determinate"
+                    value={item.positive ? Math.min((item.profit / item.sotuv) * 100 + 40, 100) : 20}
+                    sx={{
+                      height: 6,
                       borderRadius: 3,
-                    },
-                  }}
-                />
-              </div>
-            ))}
+                      bgcolor: '#f3f4f6',
+                      '& .MuiLinearProgress-bar': {
+                        bgcolor: item.positive ? '#22c55e' : '#ef4444',
+                        borderRadius: 3,
+                      },
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

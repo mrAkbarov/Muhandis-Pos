@@ -3,7 +3,7 @@ from rest_framework.permissions import  IsAdminUser, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.models import Branch
-from serializers.product_serializers import BranchModelSerializer
+from apps.serializers.product_serializers import BranchModelSerializer
 
 
 @extend_schema(tags=['Branch'])

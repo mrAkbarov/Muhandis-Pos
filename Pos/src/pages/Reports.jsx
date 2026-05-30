@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { FileDownload, CalendarToday, TrendingUp, TrendingDown } from '@mui/icons-material';
 import { Button, Chip, MenuItem, Select } from '@mui/material';
 import {
@@ -38,18 +39,31 @@ const fmtM = (n) => (n / 1000000).toFixed(1) + 'M';
 const methodColor = { Naqd: '#22c55e', Karta: '#4361ee', Online: '#f59e0b' };
 
 export default function Reports() {
+  const { permissions } = useAuth();
+  const showProfit = permissions.viewNetProfitReports;
   const [period, setPeriod] = useState('7 kun');
 
   const totalSotuv = weeklyData.reduce((s, d) => s + d.sotuv, 0);
   const totalFoyda = weeklyData.reduce((s, d) => s + d.foyda, 0);
   const avgOrder = Math.round(totalSotuv / 47);
 
+  const summaryCards = [
+    { label: 'Jami sotuv', value: fmt(totalSotuv), sub: '+18.5% o\'sish', positive: true },
+    ...(showProfit
+      ? [{ label: 'Umumiy foyda', value: fmt(totalFoyda), sub: '+22.1% o\'sish', positive: true }]
+      : []),
+    { label: 'Jami tranzaksiyalar', value: '47 ta', sub: '+5 ta yangi', positive: true },
+    { label: 'O\'rtacha order', value: fmt(avgOrder), sub: '-3.2% kamaygan', positive: false },
+  ];
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-800">Hisobotlar</h1>
-          <p className="text-sm text-gray-500">Sotuv va moliyaviy hisobotlar</p>
+          <p className="text-sm text-gray-500">
+            {showProfit ? 'Sotuv va moliyaviy hisobotlar' : 'Mahsulot aylanmasi va sotuv hajmi'}
+          </p>
         </div>
         <div className="flex gap-2">
           <Select value={period} onChange={(e) => setPeriod(e.target.value)} size="small"
@@ -66,13 +80,8 @@ export default function Reports() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: 'Jami sotuv', value: fmt(totalSotuv), sub: '+18.5% o\'sish', positive: true },
-          { label: 'Umumiy foyda', value: fmt(totalFoyda), sub: '+22.1% o\'sish', positive: true },
-          { label: 'Jami tranzaksiyalar', value: '47 ta', sub: '+5 ta yangi', positive: true },
-          { label: 'O\'rtacha order', value: fmt(avgOrder), sub: '-3.2% kamaygan', positive: false },
-        ].map((s) => (
+      <div className={`grid gap-4 ${summaryCards.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        {summaryCards.map((s) => (
           <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm">
             <p className="text-xs text-gray-500 mb-1">{s.label}</p>
             <p className="text-lg font-bold text-gray-800">{s.value}</p>
@@ -87,7 +96,9 @@ export default function Reports() {
       {/* Charts */}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-gray-700 mb-4">Sotuv & Foyda Dinamikasi</h2>
+          <h2 className="text-sm font-bold text-gray-700 mb-4">
+            {showProfit ? 'Sotuv & Foyda Dinamikasi' : 'Sotuv dinamikasi'}
+          </h2>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={weeklyData} margin={{ left: -20, right: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -96,8 +107,12 @@ export default function Reports() {
               <Tooltip formatter={(v, n) => [fmt(v), n === 'sotuv' ? 'Sotuv' : n === 'foyda' ? 'Foyda' : 'Xarajat']} />
               <Legend formatter={(v) => v === 'sotuv' ? 'Sotuv' : v === 'foyda' ? 'Foyda' : 'Xarajat'} />
               <Line type="monotone" dataKey="sotuv" stroke="#4361ee" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="foyda" stroke="#22c55e" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="xarajat" stroke="#f97316" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+              {showProfit && (
+                <>
+                  <Line type="monotone" dataKey="foyda" stroke="#22c55e" strokeWidth={2.5} dot={false} />
+                  <Line type="monotone" dataKey="xarajat" stroke="#f97316" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+                </>
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
