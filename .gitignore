@@ -3,8 +3,27 @@
 .env
 node_modules
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
 
-README.md
+# Django
+db.sqlite3
+media/
+static/
+
+# Frontend (Pos)
+Pos/dist/
+Pos/node_modules/
+
+# SQLTools parol (nusxa: .vscode/settings.json.example)
+.vscode/settings.json
 
 ctrl + k            - commit
 ctrl + t            - pull

@@ -20,15 +20,18 @@ class Branch(Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, phone, password=None, **extra_fields):
+    def create_user(self, username, password=None, **extra_fields):
+        if not username:
+            raise ValueError("Username is required")
+        phone = extra_fields.get('phone')
         if not phone:
             raise ValueError("Phone number is required")
-        user = self.model(phone=phone, **extra_fields)
+        user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone, password=None, **extra_fields):
+    def create_superuser(self, username, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("role", "admin")
@@ -38,17 +41,19 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValidationError("Superuser must have is_superuser=True.")
 
-        return self.create_user(phone, password, **extra_fields)
+        return self.create_user(username, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(TextChoices):
         ADMIN = "admin", "Admin"
+        BOSS = "boss", "Boss"
         OWNER = "owner", "Owner"
         MANAGER = "manager", "Manager"
         CASHIER = "cashier", "Cashier"
 
     id = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    username = CharField(max_length=150, unique=True, null=True, blank=True)
     phone = CharField(max_length=20, unique=True)
     email = EmailField(blank=True, null=True)
     first_name = CharField(max_length=100)
@@ -65,8 +70,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "phone"
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["phone", "first_name", "last_name"]
 
     class Meta:
         verbose_name = "User"
@@ -87,9 +92,9 @@ class User(AbstractBaseUser, PermissionsMixin):
                 raise ValidationError({
                     "branch": f"{self.get_role_display()} roli uchun filial (branch) tanlanishi shart!"
                 })
-            if self.role == self.Role.ADMIN and self.branch:
+            if self.role in (self.Role.ADMIN, self.Role.BOSS, self.Role.OWNER) and self.branch:
                 raise ValidationError({
-                    "branch": "Admin biron bir filialga biriktirilishi mumkin emas (Tizim boshqaruvchisi)!"
+                    "branch": "Admin/Boss filialga biriktirilmaydi!"
                 })
 
     def save(self, *args, **kwargs):

@@ -32,13 +32,20 @@ class LoginAPIView(GenericAPIView):
         refresh = RefreshToken.for_user(user)
         return Response({
             'message': 'Login successful',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh),
             'user': {
-                'id': user.id,
+                'id': str(user.id),
+                'username': user.username,
                 'phone': user.phone,
                 'email': user.email,
+                'name': user.full_name,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-            }
+                'role': user.role,
+                'active': user.is_active,
+                'branch': str(user.branch_id) if user.branch_id else None,
+            },
         })

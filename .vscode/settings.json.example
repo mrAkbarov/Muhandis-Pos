@@ -1,0 +1,14 @@
+{
+  "sqltools.connections": [
+    {
+      "name": "pos_systemdb@localhost",
+      "driver": "PostgreSQL",
+      "server": "localhost",
+      "port": 5432,
+      "database": "pos_systemdb",
+      "username": "postgres",
+      "password": "YOUR_PASSWORD",
+      "connectionTimeout": 30
+    }
+  ]
+}

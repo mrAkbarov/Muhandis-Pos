@@ -24,11 +24,20 @@ class RegisterModelSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = 'id', 'phone', 'email', 'first_name', 'last_name', 'branch', 'password', 'confirm_password',
+        fields = (
+            'id', 'username', 'phone', 'email', 'first_name', 'last_name',
+            'role', 'branch', 'password', 'confirm_password',
+        )
         extra_kwargs = {
             'id': {'read_only': True},
             'password': {'write_only': True}
         }
+
+    def validate_username(self, value):
+        value = value.strip().lower()
+        if User.objects.filter(username=value).exists():
+            raise ValidationError("Bu login band")
+        return value
 
     def validate_phone(self, value):
         validate_uzbek_phone(value)
@@ -53,20 +62,30 @@ class RegisterModelSerializer(ModelSerializer):
 
 
 class LoginModelSerializer(Serializer):
-    phone = CharField()
+    username = CharField(required=False)
+    phone = CharField(required=False)
     password = CharField(write_only=True)
 
     def validate(self, attrs):
-        phone = attrs.get('phone')
         password = attrs.get('password')
+        login_id = attrs.get('username') or attrs.get('phone')
+        if not login_id:
+            raise ValidationError("Login (username yoki telefon) kiritilishi shart")
+
         user = authenticate(
             request=self.context.get('request'),
-            phone=phone,
-            password=password
+            username=login_id,
+            password=password,
         )
+        if not user and attrs.get('phone'):
+            user = authenticate(
+                request=self.context.get('request'),
+                username=attrs['phone'],
+                password=password,
+            )
 
         if not user:
-            raise ValidationError("Telefon raqam yoki parol xato")
+            raise ValidationError("Login yoki parol xato")
 
         if not user.is_active:
             raise ValidationError("Foydalanuvchi aktiv emas")
