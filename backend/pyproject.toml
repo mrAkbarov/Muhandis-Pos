@@ -1,0 +1,39 @@
+[project]
+name = "valijon-project"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "django-cors-headers>=4.7.0",
+    "django>=6.0.4",
+    "django-filter>=25.2",
+    "djangorestframework>=3.17.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "djangorestframework-stubs>=3.17.0",
+    "drf-spectacular>=0.29.0",
+    "pillow>=12.2.0",
+    "psycopg2-binary>=2.9.11",
+    "python-dotenv>=1.2.2",
+    "redis>=7.4.0",
+    "gunicorn>=23.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-silk>=5.5.0",
+    "ruff>=0.11.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+src = ["apps", "root"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "root"]
+
+[tool.ruff.format]
+quote-style = "single"

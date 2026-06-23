@@ -1,7 +1,12 @@
 .venv
 .idea
 .env
+backend/.env
+frontend/.env
+
 node_modules
+frontend/node_modules
+frontend/dist
 
 # Python
 __pycache__/
@@ -14,17 +19,11 @@ dist/
 build/
 
 # Django
-db.sqlite3
-media/
-static/
+backend/db.sqlite3
+backend/media/
+backend/static/
 
-# Frontend (Pos)
-Pos/dist/
-Pos/node_modules/
+store_logins.txt
 
-# SQLTools parol (nusxa: .vscode/settings.json.example)
+# SQLTools
 .vscode/settings.json
-
-ctrl + k            - commit
-ctrl + t            - pull
-ctrl + shift + k    - push

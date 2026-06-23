@@ -1,61 +1,69 @@
-# POS tizimi
+# Muhandis Pos — monorepo
 
-Bu loyiha — Vite + React yordamida yaratilgan savdo nuqtasini boshqarish (POS) web-ilovasi. U mahsulotlar, inventarizatsiya, savdo, CRM, yetkazib beruvchilar, buyurtmalar, AI tahlillari va hisob-kitob bo‘limlarini o‘z ichiga oladi.
+```
+pos-project/
+├── backend/          # Django + DRF API
+├── frontend/         # React + Vite (Bun)
+└── compose.yaml        # faqat PostgreSQL (lokal DB)
+```
 
-## Loyihaning asosiy funksiyalari
+## Lokal ishga tushirish
 
-- Dashboard: sotuv statistikasi, grafiklar va AI tavsiyalari.
-- POS: savdo nuqtasi interfeysi.
-- Mahsulotlar bo‘limi: mahsulotlarni ko‘rish va boshqarish.
-- Inventarizatsiya: zaxira holati, kam mahsulotlar va tugashlar.
-- CRM: mijozlar bilan ishlash.
-- Yetkazib beruvchilar: ta’minotchilar ro‘yxati.
-- Buyurtmalar: xarid buyurtmalarini kuzatish.
-- AI Analytics: aqlli tahlillar va tavsiyalar.
-- Muddat boshqaruvi: amal qilish muddati yaqin mahsulotlarni kuzatish.
-- Hisobotlar va sozlamalar.
+**Backend:**
+```bash
+cd backend
+cp .env.example .env
+uv sync
+uv run python manage.py migrate
+uv run python manage.py seed_pos_demo
+uv run python manage.py runserver
+```
 
-## Texnologiyalar
+**Frontend:**
+```bash
+cd frontend
+cp .env.example .env
+bun install
+bun run dev
+```
 
-- React 19
-- Vite
-- React Router DOM
-- Tailwind CSS
-- Material UI (MUI)
-- Recharts
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
 
-## Loyihani ishga tushirish
+## Docker (tavsiya — hammasi bir buyruqda)
 
-1. Loyihani yuklab oling va papkaga o'ting:
+PostgreSQL + backend + frontend birga:
 
-cd /home/akbar/Рабочий стол/Pos
+```bash
+docker compose up --build
+```
 
-2. Bog‘liqliklarni o‘rnating:
+yoki:
 
-npm install
+```bash
+make docker-up
+```
 
-3. Ishlab chiqish serverini ishga tushiring:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- PostgreSQL (host): `127.0.0.1:5433`
 
-npm run dev
+Birinchi marta demo ma'lumot kerak bo'lsa, `docker-compose.yaml` ichida `SEED_DEMO: "1"` qiling yoki:
 
-4. Brauzeringizda quyidagiga tashrif buyuring:
+```bash
+docker compose exec backend uv run python manage.py seed_pos_demo
+```
 
-http://localhost:5173
+To'xtatish: `Ctrl+C` yoki `docker compose down`
 
-## Skriptlar
+---
 
-- npm run dev — rivojlantirish serverini ishga tushiradi.
-- npm run build — ishlab chiqarish uchun paketlaydi.
-- npm run preview — qurilgan versiyani mahalliy serverda ko‘rsatadi.
-- npm run lint — ESLint orqali kodni tekshiradi.
+## Lokal ishga tushirish (ixtiyoriy)
 
-## Loyihaning tuzilishi
+Docker ishlatmasangiz — backend va frontend alohida terminalda:
 
-- src/main.jsx — ilovani DOMga ulash.
-- src/App.jsx — marshrutlar va asosiy sahifalar.
-- src/components/layout — umumiy sahifa tartibi, Header va Sidebar.
-- src/pages — Dashboard, POS, Products, Inventory, CRM, Suppliers, PurchaseOrders, AIAnalytics, ExpireManagement, Reports, Settings.
-
-## Eslatma
-
-Bu README loyiha xususiyatlarini o‘zbek tilida tushunarli tarzda taqdim etadi. Agar kerak bo‘lsa, qo‘shimcha bo‘limlar yoki tavsiflarni ham yozib beraman.
+```bash
+make docker-up          # faqat postgres
+make run                # backend (boshqa terminal)
+make frontend-dev       # frontend (boshqa terminal)
+```

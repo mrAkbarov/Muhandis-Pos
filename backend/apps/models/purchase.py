@@ -1,0 +1,75 @@
+from django.conf import settings
+from django.db.models import (
+    CharField,
+    DateField,
+    DecimalField,
+    ForeignKey,
+    PositiveIntegerField,
+)
+
+from apps.models.base import PurchaseOrderStatus, TimeStampedModel, branch_foreign_key, supplier_foreign_key
+
+
+class PurchaseOrder(TimeStampedModel):
+    """Dilerdan kelgan buyurtma — prixod qabul qilinguncha kutiladi."""
+
+    branch = branch_foreign_key('purchase_orders', verbose_name='Filial')
+    external_id = CharField(max_length=50, unique=True, verbose_name='Buyurtma raqami')
+    supplier = supplier_foreign_key('orders', verbose_name='Diler')
+    supplier_name = CharField(max_length=50, blank=True, verbose_name='Diler nomi (nusxa)')
+    date = DateField(verbose_name='Buyurtma sanasi')
+    receipt_date = DateField(null=True, blank=True, verbose_name='Qabul qilingan sana')
+    total = DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name='Jami summa')
+    status = CharField(
+        max_length=50,
+        choices=PurchaseOrderStatus.choices,
+        default=PurchaseOrderStatus.PENDING,
+        verbose_name='Holat',
+    )
+
+    class Meta:
+        verbose_name = 'Xarid buyurtmasi'
+        verbose_name_plural = 'Xarid buyurtmalari'
+        ordering = ['-date']
+
+    def __str__(self):
+        return self.external_id
+
+
+class PurchaseOrderLine(TimeStampedModel):
+    """Buyurtma qatori — mahsulot, miqdor, hajm."""
+
+    order = ForeignKey(
+        PurchaseOrder,
+        settings.ON_DELETE_CASCADE,
+        related_name='lines',
+        verbose_name='Buyurtma',
+    )
+    product = ForeignKey(
+        'apps.Product',
+        settings.ON_DELETE_SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Mahsulot',
+    )
+    name = CharField(max_length=50, verbose_name='Nomi')
+    quantity = PositiveIntegerField(verbose_name='Miqdor')
+    item_type = CharField(max_length=50, blank=True, verbose_name='Turi')
+    size = CharField(max_length=50, blank=True, verbose_name='Hajm')
+    unit = CharField(max_length=20, blank=True, verbose_name='O\'lchov')
+    cost_price = DecimalField(max_digits=12, decimal_places=2, verbose_name='Narx')
+    catalog_item = ForeignKey(
+        'apps.SupplierCatalogItem',
+        settings.ON_DELETE_SET_NULL,
+        null=True,
+        blank=True,
+        related_name='order_lines',
+        verbose_name='Katalog elementi',
+    )
+
+    class Meta:
+        verbose_name = 'Buyurtma qatori'
+        verbose_name_plural = 'Buyurtma qatorlari'
+
+    def __str__(self):
+        return f'{self.name} x{self.quantity}'
