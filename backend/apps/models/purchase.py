@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import (
     CASCADE,
     SET_NULL,
@@ -23,15 +22,10 @@ class PurchaseOrder(TimeStampedModel):
     receipt_date = DateField(null=True, blank=True, verbose_name='Qabul qilingan sana')
     total = DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name='Jami summa')
     status = CharField(
-        max_length=50,
-        choices=PurchaseOrderStatus.choices,
-        default=PurchaseOrderStatus.PENDING,
-        verbose_name='Holat',
+        max_length=50, choices=PurchaseOrderStatus.choices, default=PurchaseOrderStatus.PENDING, verbose_name='Holat'
     )
 
     class Meta:
-        verbose_name = 'Xarid buyurtmasi'
-        verbose_name_plural = 'Xarid buyurtmalari'
         ordering = ['-date']
 
     def __str__(self):
@@ -41,24 +35,13 @@ class PurchaseOrder(TimeStampedModel):
 class PurchaseOrderLine(TimeStampedModel):
     """Buyurtma qatori — mahsulot, miqdor, hajm."""
 
-    order = ForeignKey(
-        "apps.PurchaseOrder",
-        CASCADE,
-        related_name='lines',
-        verbose_name='Buyurtma',
-    )
-    product = ForeignKey(
-        'apps.Product',
-        SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name='Mahsulot',
-    )
+    order = ForeignKey('apps.PurchaseOrder', CASCADE, related_name='lines', verbose_name='Buyurtma')
+    product = ForeignKey('apps.Product', SET_NULL, null=True, blank=True, verbose_name='Mahsulot')
     name = CharField(max_length=50, verbose_name='Nomi')
     quantity = PositiveIntegerField(verbose_name='Miqdor')
     item_type = CharField(max_length=50, blank=True, verbose_name='Turi')
     size = CharField(max_length=50, blank=True, verbose_name='Hajm')
-    unit = CharField(max_length=20, blank=True, verbose_name='O\'lchov')
+    unit = CharField(max_length=20, blank=True, verbose_name="O'lchov")
     cost_price = DecimalField(max_digits=12, decimal_places=2, verbose_name='Narx')
     catalog_item = ForeignKey(
         'apps.SupplierCatalogItem',
@@ -69,9 +52,6 @@ class PurchaseOrderLine(TimeStampedModel):
         verbose_name='Katalog elementi',
     )
 
-    class Meta:
-        verbose_name = 'Buyurtma qatori'
-        verbose_name_plural = 'Buyurtma qatorlari'
 
     def __str__(self):
         return f'{self.name} x{self.quantity}'

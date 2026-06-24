@@ -15,8 +15,6 @@ class Branch(UUIDPrimaryKeyModel, TimeStampedModel):
     phone = CharField(max_length=20, blank=True, null=True, verbose_name='Telefon')
 
     class Meta:
-        verbose_name = 'Filial'
-        verbose_name_plural = 'Filiallar'
         ordering = ['name']
 
     def __str__(self):
@@ -75,19 +73,53 @@ class User(AbstractBaseUser, PermissionsMixin, UUIDPrimaryKeyModel, TimeStampedM
         super().clean()
         if self.phone:
             self.phone = normalize_uz_phone(self.phone)
-        if Branch.objects.exists():
+
+        branch_count = Branch.objects.count()
+        if branch_count == 0:
+            if self.branch:
+                raise ValidationError({'branch': 'Tizimda filiallar mavjud emas. Avval filial yarating.'})
+            return
+        else:
             if self.role in (self.Role.CASHIER, self.Role.MANAGER) and not self.branch:
-                raise ValidationError({
-                    'branch': f'{self.get_role_display()} uchun filial tanlanishi shart',
-                })
-            if self.role in (self.Role.BOSS, self.Role.OWNER) and self.branch:
-                raise ValidationError({'branch': 'Boss/Egasi filialga biriktirilmaydi'})
-            # Admin + filial = do'kon admini; admin filialsiz = platform admin
+                raise ValidationError(
+                    {
+                        'branch': f"Filiallar ko'p ({branch_count} ta). {self.get_role_display()} uchun aniq filialni tanlang!"
+                    }
+                )
+        if self.role in (self.Role.BOSS, self.Role.OWNER) and self.branch:
+            raise ValidationError({'branch': 'Boss yoki Egasi alohida filialga biriktirilmaydi.'})
 
     def save(self, *args, **kwargs):
         if self.is_superuser:
             self.role = self.Role.ADMIN
         if self.phone:
             self.phone = normalize_uz_phone(self.phone)
+        branch_count = Branch.objects.count()
+        # 1 yoki 2 ta filialli kichik tarmoqlar uchun avtomatik biriktirish mantiqi:
+        if 1 <= branch_count <= 2:
+            if self.role in (self.Role.CASHIER, self.Role.MANAGER) and not self.branch:
+                first_branch = Branch.objects.first()
+                if first_branch:
+                    self.branch = first_branch
         self.full_clean()
         super().save(*args, **kwargs)
+
+    @property
+    def is_admin(self):
+        return self.role == self.Role.ADMIN
+
+    @property
+    def is_boss(self):
+        return self.role == self.Role.BOSS
+
+    @property
+    def is_owner(self):
+        return self.role == self.Role.OWNER
+
+    @property
+    def is_manager(self):
+        return self.role == self.Role.MANAGER
+
+    @property
+    def is_cashier(self):
+        return self.role == self.Role.CASHIER

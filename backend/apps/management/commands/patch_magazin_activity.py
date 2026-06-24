@@ -70,7 +70,7 @@ def apply_activity_mix(
 
     inactive_set = set(store_nums[:n_inactive])
     low_set = set(store_nums[n_inactive:n_inactive + n_low])
-    active_set = set(store_nums[n_inactive + n_low:])
+    set(store_nums[n_inactive + n_low:])
 
     d7 = today - timedelta(days=7)
     d30 = today - timedelta(days=30)

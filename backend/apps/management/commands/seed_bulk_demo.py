@@ -5,8 +5,8 @@ Ishlatish: python manage.py seed_bulk_demo
 
 import random
 import string
-from datetime import date, timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -37,17 +37,59 @@ PAYMENT_METHODS = [
 ]
 
 CATEGORIES = [
-    'Ichimliklar', 'Oziq-ovqat', 'Sut mahsulotlari', 'Shirinliklar',
-    'Kraxmal', "Go'sht mahsulotlari", 'Non va pishiriq', 'Maishiy kimyo',
-    'Muzlatilgan', 'Snacks',
+    'Ichimliklar',
+    'Oziq-ovqat',
+    'Sut mahsulotlari',
+    'Shirinliklar',
+    'Kraxmal',
+    "Go'sht mahsulotlari",
+    'Non va pishiriq',
+    'Maishiy kimyo',
+    'Muzlatilgan',
+    'Snacks',
 ]
 
 PRODUCT_STEMS = [
-    'Cola', 'Pepsi', 'Fanta', 'Sprite', 'Suv', 'Choy', 'Qahva', 'Sut', 'Qatiq',
-    'Smetana', 'Pishloq', 'Non', 'Baton', 'Lay\'s', 'Pringles', 'Snickers',
-    'Mars', 'Twix', 'Shokolad', 'Pechenye', 'Guruch', 'Makaron', 'Un', 'Yog\'',
-    'Tuxum', 'Kolbasa', 'Sosiska', 'Go\'sht', 'Tovuq', 'Baliq', 'Sabzi', 'Kartoshka',
-    'Piyoz', 'Olma', 'Banan', 'Uzum', 'Detergent', 'Shampun', 'Sovun', 'Salfetka',
+    'Cola',
+    'Pepsi',
+    'Fanta',
+    'Sprite',
+    'Suv',
+    'Choy',
+    'Qahva',
+    'Sut',
+    'Qatiq',
+    'Smetana',
+    'Pishloq',
+    'Non',
+    'Baton',
+    "Lay's",
+    'Pringles',
+    'Snickers',
+    'Mars',
+    'Twix',
+    'Shokolad',
+    'Pechenye',
+    'Guruch',
+    'Makaron',
+    'Un',
+    "Yog'",
+    'Tuxum',
+    'Kolbasa',
+    'Sosiska',
+    "Go'sht",
+    'Tovuq',
+    'Baliq',
+    'Sabzi',
+    'Kartoshka',
+    'Piyoz',
+    'Olma',
+    'Banan',
+    'Uzum',
+    'Detergent',
+    'Shampun',
+    'Sovun',
+    'Salfetka',
 ]
 
 SIZES = ['250g', '500g', '1kg', '1L', '0.5L', '1.5L', '330ml', '50g', '100g', 'dona']
@@ -55,27 +97,86 @@ UNITS = ['dona', 'litr', 'kg', 'gr', 'pachka', 'quti']
 EMOJIS = ['🥤', '🥛', '🍫', '🍟', '🫓', '🥩', '🧴', '🍎', '📦', '🧃']
 
 SUPPLIER_STEMS = [
-    'Coca-Cola', 'PepsiCo', 'Nestle', 'Lactalis', 'Nestle UZ', 'Azersun', 'Olmaliq',
-    'Artel Food', 'Registan', 'Samarqand Non', 'Toshkent Go\'sht', 'UzSnacks',
-    'Shirin', 'Bonduelle', 'Makro', 'Metro Cash', 'Baraka', 'Navbahor', 'Oqtepa',
-    'Milliy Diler', 'Fresh Market', 'Optom UZ', 'Bozor Link', 'Asia Trade',
+    'Coca-Cola',
+    'PepsiCo',
+    'Nestle',
+    'Lactalis',
+    'Nestle UZ',
+    'Azersun',
+    'Olmaliq',
+    'Artel Food',
+    'Registan',
+    'Samarqand Non',
+    "Toshkent Go'sht",
+    'UzSnacks',
+    'Shirin',
+    'Bonduelle',
+    'Makro',
+    'Metro Cash',
+    'Baraka',
+    'Navbahor',
+    'Oqtepa',
+    'Milliy Diler',
+    'Fresh Market',
+    'Optom UZ',
+    'Bozor Link',
+    'Asia Trade',
 ]
 
 FIRST_NAMES = [
-    'Aziz', 'Bobur', 'Dilshod', 'Eldor', 'Farhod', 'G\'olib', 'Hamid', 'Ibrohim',
-    'Javohir', 'Kamol', 'Laziz', 'Mirzo', 'Nodir', 'Otabek', 'Parviz', 'Rustam',
-    'Sardor', 'Timur', 'Ulug\'bek', 'Vali', 'Zafar', 'Shohruh', 'Bekzod', 'Doniyor',
-    'Malika', 'Nigora', 'Zilola', 'Dilnoza', 'Gulnora', 'Sevara', 'Madina', 'Nilufar',
+    'Aziz',
+    'Bobur',
+    'Dilshod',
+    'Eldor',
+    'Farhod',
+    "G'olib",
+    'Hamid',
+    'Ibrohim',
+    'Javohir',
+    'Kamol',
+    'Laziz',
+    'Mirzo',
+    'Nodir',
+    'Otabek',
+    'Parviz',
+    'Rustam',
+    'Sardor',
+    'Timur',
+    "Ulug'bek",
+    'Vali',
+    'Zafar',
+    'Shohruh',
+    'Bekzod',
+    'Doniyor',
+    'Malika',
+    'Nigora',
+    'Zilola',
+    'Dilnoza',
+    'Gulnora',
+    'Sevara',
+    'Madina',
+    'Nilufar',
 ]
 
 LAST_NAMES = [
-    'Karimov', 'Tursunov', 'Rahimov', 'Saidov', 'Yusupov', 'Alimov', 'Nazarov',
-    'Mirzayev', 'Qodirov', 'Ergashev', 'Xolmatov', 'Ismoilov', 'Abdurahmonov',
+    'Karimov',
+    'Tursunov',
+    'Rahimov',
+    'Saidov',
+    'Yusupov',
+    'Alimov',
+    'Nazarov',
+    'Mirzayev',
+    'Qodirov',
+    'Ergashev',
+    'Xolmatov',
+    'Ismoilov',
+    'Abdurahmonov',
 ]
 
 
 def weighted_choice(pairs):
-    items, weights = zip(*pairs)
+    items, weights = zip(*pairs, strict=False)
     return random.choices(items, weights=weights, k=1)[0]
 
 
@@ -114,7 +215,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--clear',
             action='store_true',
-            help=f'Oldingi "{BULK_PREFIX}" filiallarini va bog\'liq ma\'lumotlarni o\'chirish',
+            help=f"Oldingi \"{BULK_PREFIX}\" filiallarini va bog'liq ma'lumotlarni o'chirish",
         )
 
     def handle(self, *args, **options):
@@ -123,7 +224,7 @@ class Command(BaseCommand):
 
         if options['clear']:
             deleted, _ = Branch.objects.filter(name__startswith=BULK_PREFIX).delete()
-            self.stdout.write(self.style.WARNING(f'O\'chirildi: {deleted} obyekt'))
+            self.stdout.write(self.style.WARNING(f"O'chirildi: {deleted} obyekt"))
 
         branch_count = random.randint(options['branches_min'], options['branches_max'])
         product_count = random.randint(options['products_min'], options['products_max'])
@@ -137,18 +238,20 @@ class Command(BaseCommand):
         self.stdout.write(
             f'Reja: {branch_count} filial, {product_count} mahsulot, '
             f'{supplier_count} diler, {debtor_count} qarzdor, '
-            f'{sale_count}x{days} sotuv, ~{target_revenue:,} so\'m'
+            f"{sale_count}x{days} sotuv, ~{target_revenue:,} so'm"
         )
 
         with transaction.atomic():
             branches = self._create_branches(branch_count)
             categories = self._ensure_categories()
             products, products_by_branch = self._create_products(
-                branches, categories, product_count,
+                branches,
+                categories,
+                product_count,
             )
             warehouses = self._create_warehouses(branches)
             self._create_inventory(products, warehouses)
-            suppliers = self._create_suppliers(branches, supplier_count, products_by_branch)
+            self._create_suppliers(branches, supplier_count, products_by_branch)
             cashiers_by_branch = self._ensure_cashiers(branches)
             debtors = self._create_debtors(branches, debtor_count)
             self._create_online_payments(debtors, online_payers)
@@ -162,12 +265,10 @@ class Command(BaseCommand):
                 target_revenue,
             )
 
-        self.stdout.write(self.style.SUCCESS(
-            f'Tayyor! Sotuvlar: {total_sales:,} ta, jami aylanma: {total_amount:,} so\'m'
-        ))
         self.stdout.write(
-            f'Filiallar: {", ".join(b.name for b in branches)}'
+            self.style.SUCCESS(f"Tayyor! Sotuvlar: {total_sales:,} ta, jami aylanma: {total_amount:,} so'm")
         )
+        self.stdout.write(f'Filiallar: {", ".join(b.name for b in branches)}')
 
     def _create_branches(self, count):
         branches = []
@@ -215,18 +316,20 @@ class Command(BaseCommand):
                 cost = money(random.randint(3_000, 120_000))
                 markup = random.uniform(1.08, 1.45)
                 price = money(cost * Decimal(str(markup)))
-                batch.append(Product(
-                    name=name[:50],
-                    barcode=unique_barcode(barcode_idx),
-                    category=random.choice(categories),
-                    branch=branch,
-                    selling_price=price,
-                    base_price=cost,
-                    emoji=random.choice(EMOJIS),
-                    size=size,
-                    unit=random.choice(UNITS),
-                    stock=random.randint(50, 800),
-                ))
+                batch.append(
+                    Product(
+                        name=name[:50],
+                        barcode=unique_barcode(barcode_idx),
+                        category=random.choice(categories),
+                        branch=branch,
+                        selling_price=price,
+                        base_price=cost,
+                        emoji=random.choice(EMOJIS),
+                        size=size,
+                        unit=random.choice(UNITS),
+                        stock=random.randint(50, 800),
+                    )
+                )
                 barcode_idx += 1
 
             created = Product.objects.bulk_create(batch, batch_size=500)
@@ -253,13 +356,15 @@ class Command(BaseCommand):
             wh = wh_by_branch.get(product.branch_id)
             if not wh:
                 continue
-            batch.append(InventoryItem(
-                product=product,
-                warehouse=wh,
-                quantity=product.stock,
-            ))
+            batch.append(
+                InventoryItem(
+                    product=product,
+                    warehouse=wh,
+                    quantity=product.stock,
+                )
+            )
         InventoryItem.objects.bulk_create(batch, batch_size=500, ignore_conflicts=True)
-        self.stdout.write(f'  + {len(batch)} ombor qoldig\'i')
+        self.stdout.write(f"  + {len(batch)} ombor qoldig'i")
 
     def _create_suppliers(self, branches, total_count, products_by_branch):
         per_branch = max(1, total_count // len(branches))
@@ -268,8 +373,8 @@ class Command(BaseCommand):
         phone_base = 910_000_000
 
         for branch in branches:
-            branch_products = products_by_branch.get(branch.id, [])
-            for i in range(per_branch):
+            products_by_branch.get(branch.id, [])
+            for _i in range(per_branch):
                 phone_base += 1
                 stem = random.choice(SUPPLIER_STEMS)
                 suffix = random.randint(1, 99)
@@ -287,9 +392,7 @@ class Command(BaseCommand):
                 suppliers.append(sup)
 
         Supplier.objects.bulk_create(suppliers, batch_size=200)
-        suppliers = list(
-            Supplier.objects.filter(branch__name__startswith=BULK_PREFIX).order_by('id')
-        )
+        suppliers = list(Supplier.objects.filter(branch__name__startswith=BULK_PREFIX).order_by('id'))
 
         for sup in suppliers:
             picks = random.sample(
@@ -297,16 +400,18 @@ class Command(BaseCommand):
                 k=min(random.randint(8, 25), len(products_by_branch.get(sup.branch_id, []))),
             )
             for prod in picks:
-                catalog_batch.append(SupplierCatalogItem(
-                    supplier=sup,
-                    name=prod.name,
-                    category=prod.category.name,
-                    default_cost=prod.base_price,
-                    size=prod.size or '',
-                    unit=prod.unit or 'dona',
-                    barcode=prod.barcode,
-                    product=prod,
-                ))
+                catalog_batch.append(
+                    SupplierCatalogItem(
+                        supplier=sup,
+                        name=prod.name,
+                        category=prod.category.name,
+                        default_cost=prod.base_price,
+                        size=prod.size or '',
+                        unit=prod.unit or 'dona',
+                        barcode=prod.barcode,
+                        product=prod,
+                    )
+                )
 
         SupplierCatalogItem.objects.bulk_create(catalog_batch, batch_size=500)
         self.stdout.write(f'  + {len(suppliers)} diler, {len(catalog_batch)} katalog elementi')
@@ -315,9 +420,7 @@ class Command(BaseCommand):
     def _ensure_cashiers(self, branches):
         result = {}
         for i, branch in enumerate(branches, start=1):
-            existing = list(
-                User.objects.filter(branch=branch, role=User.Role.CASHIER, is_active=True)[:5]
-            )
+            existing = list(User.objects.filter(branch=branch, role=User.Role.CASHIER, is_active=True)[:5])
             if len(existing) >= 2:
                 result[branch.id] = existing
                 continue
@@ -344,36 +447,38 @@ class Command(BaseCommand):
     def _create_debtors(self, branches, total_count):
         debtors = []
         phone_base = 930_000_000
-        for i in range(total_count):
+        for _i in range(total_count):
             branch = random.choice(branches)
             phone_base += 1
             name = f'{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}'
             balance = money(random.randint(0, 2_500_000))
             if random.random() < 0.15:
                 balance = money(0)
-            debtors.append(CreditAccount(
-                branch=branch,
-                customer_name=name[:50],
-                phone=str(phone_base),
-                balance=balance,
-            ))
+            debtors.append(
+                CreditAccount(
+                    branch=branch,
+                    customer_name=name[:50],
+                    phone=str(phone_base),
+                    balance=balance,
+                )
+            )
 
         CreditAccount.objects.bulk_create(debtors, batch_size=500)
-        debtors = list(
-            CreditAccount.objects.filter(branch__name__startswith=BULK_PREFIX).order_by('id')
-        )
+        debtors = list(CreditAccount.objects.filter(branch__name__startswith=BULK_PREFIX).order_by('id'))
 
         charge_batch = []
         for acc in debtors:
             if acc.balance <= 0:
                 continue
-            charge_batch.append(CreditTransaction(
-                account=acc,
-                kind=CreditTransaction.Kind.CHARGE,
-                amount=acc.balance,
-                note='Nasiya savdo',
-                cashier_name='Tizim',
-            ))
+            charge_batch.append(
+                CreditTransaction(
+                    account=acc,
+                    kind=CreditTransaction.Kind.CHARGE,
+                    amount=acc.balance,
+                    note='Nasiya savdo',
+                    cashier_name='Tizim',
+                )
+            )
         CreditTransaction.objects.bulk_create(charge_batch, batch_size=500)
         self.stdout.write(f'  + {len(debtors)} qarzdor ({len(charge_batch)} ta charge)')
         return debtors
@@ -388,17 +493,19 @@ class Command(BaseCommand):
             if pay_amount <= 0:
                 continue
             acc.balance -= pay_amount
-            tx_batch.append(CreditTransaction(
-                account=acc,
-                kind=CreditTransaction.Kind.PAYMENT,
-                amount=pay_amount,
-                note='Online to\'lov',
-                cashier_name='Online',
-            ))
+            tx_batch.append(
+                CreditTransaction(
+                    account=acc,
+                    kind=CreditTransaction.Kind.PAYMENT,
+                    amount=pay_amount,
+                    note="Online to'lov",
+                    cashier_name='Online',
+                )
+            )
 
         CreditAccount.objects.bulk_update(payers, ['balance'], batch_size=200)
         CreditTransaction.objects.bulk_create(tx_batch, batch_size=200)
-        self.stdout.write(f'  + {len(tx_batch)} online to\'lov (qarzdorlar)')
+        self.stdout.write(f"  + {len(tx_batch)} online to'lov (qarzdorlar)")
 
     def _create_sales(
         self,
@@ -440,9 +547,7 @@ class Command(BaseCommand):
                 if not lines:
                     continue
 
-                actual_amount = money(sum(
-                    Decimal(str(l['quantity'])) * l['unit_price'] for l in lines
-                ))
+                actual_amount = money(sum(Decimal(str(line['quantity'])) * line['unit_price'] for line in lines))
                 cashier = random.choice(cashiers_by_branch.get(branch.id, [None]))
                 cashier_name = cashier.full_name if cashier else 'Kassir'
                 method = weighted_choice(PAYMENT_METHODS)
@@ -451,17 +556,19 @@ class Command(BaseCommand):
                 external_id = f'TXN-BULK-{sale_date.strftime("%Y%m%d")}-{sale_seq:06d}'
                 sale_seq += 1
 
-                pending.append({
-                    'branch': branch,
-                    'external_id': external_id,
-                    'date': sale_date,
-                    'time': f'{hour:02d}:{minute:02d}',
-                    'amount': actual_amount,
-                    'method': method,
-                    'cashier': cashier,
-                    'cashier_name': cashier_name,
-                    'lines': lines,
-                })
+                pending.append(
+                    {
+                        'branch': branch,
+                        'external_id': external_id,
+                        'date': sale_date,
+                        'time': f'{hour:02d}:{minute:02d}',
+                        'amount': actual_amount,
+                        'method': method,
+                        'cashier': cashier,
+                        'cashier_name': cashier_name,
+                        'lines': lines,
+                    }
+                )
                 total_amount += actual_amount
 
             sales_batch = [
@@ -474,11 +581,14 @@ class Command(BaseCommand):
                     method=p['method'],
                     cashier=p['cashier'],
                     cashier_name=p['cashier_name'],
-                    items=[{
-                        'name': l['product_name'],
-                        'qty': l['quantity'],
-                        'price': float(l['unit_price']),
-                    } for l in p['lines']],
+                    items=[
+                        {
+                            'name': line['product_name'],
+                            'qty': line['quantity'],
+                            'price': float(line['unit_price']),
+                        }
+                        for line in p['lines']
+                    ],
                 )
                 for p in pending
             ]
@@ -489,14 +599,16 @@ class Command(BaseCommand):
             credit_charges = []
             accounts_to_update = {}
 
-            for sale, pdata in zip(created_sales, pending):
+            for sale, pdata in zip(created_sales, pending, strict=False):
                 for line in pdata['lines']:
-                    lines_batch.append(SaleLine(
-                        sale=sale,
-                        product_name=line['product_name'],
-                        quantity=line['quantity'],
-                        unit_price=line['unit_price'],
-                    ))
+                    lines_batch.append(
+                        SaleLine(
+                            sale=sale,
+                            product_name=line['product_name'],
+                            quantity=line['quantity'],
+                            unit_price=line['unit_price'],
+                        )
+                    )
 
                 if pdata['method'] != 'Nasiya':
                     continue
@@ -507,14 +619,16 @@ class Command(BaseCommand):
                 current = accounts_to_update.get(acc.id, acc)
                 current.balance = money(current.balance + pdata['amount'])
                 accounts_to_update[acc.id] = current
-                credit_charges.append(CreditTransaction(
-                    account=current,
-                    kind=CreditTransaction.Kind.CHARGE,
-                    amount=pdata['amount'],
-                    sale=sale,
-                    cashier_name=pdata['cashier_name'],
-                    note='Kassa nasiya',
-                ))
+                credit_charges.append(
+                    CreditTransaction(
+                        account=current,
+                        kind=CreditTransaction.Kind.CHARGE,
+                        amount=pdata['amount'],
+                        sale=sale,
+                        cashier_name=pdata['cashier_name'],
+                        note='Kassa nasiya',
+                    )
+                )
 
             SaleLine.objects.bulk_create(lines_batch, batch_size=500)
             if credit_charges:
@@ -527,9 +641,7 @@ class Command(BaseCommand):
                 )
 
             day_sum = sum(p['amount'] for p in pending)
-            self.stdout.write(
-                f'  + {len(created_sales)} sotuv ({sale_date}) → {day_sum:,} so\'m'
-            )
+            self.stdout.write(f"  + {len(created_sales)} sotuv ({sale_date}) → {day_sum:,} so'm")
 
         return total_sales, money(total_amount)
 
@@ -555,11 +667,13 @@ class Command(BaseCommand):
                 max_qty = max(1, int(remaining / prod.selling_price))
                 qty = random.randint(1, min(2, max_qty))
             qty = max(1, min(qty, 8))
-            lines.append({
-                'product_name': prod.name,
-                'quantity': qty,
-                'unit_price': prod.selling_price,
-            })
+            lines.append(
+                {
+                    'product_name': prod.name,
+                    'quantity': qty,
+                    'unit_price': prod.selling_price,
+                }
+            )
             remaining -= prod.selling_price * qty
             if remaining <= 0:
                 break
@@ -567,9 +681,11 @@ class Command(BaseCommand):
         if not lines:
             prod = affordable[0]
             qty = max(1, min(8, int(target_amount / prod.selling_price)))
-            lines.append({
-                'product_name': prod.name,
-                'quantity': qty,
-                'unit_price': prod.selling_price,
-            })
+            lines.append(
+                {
+                    'product_name': prod.name,
+                    'quantity': qty,
+                    'unit_price': prod.selling_price,
+                }
+            )
         return lines

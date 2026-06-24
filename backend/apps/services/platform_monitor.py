@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 
 from django.db.models import Count, Max, Q, Sum

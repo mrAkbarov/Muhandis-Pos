@@ -3,7 +3,7 @@
 import random
 import string
 from datetime import timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 from django.db import transaction
@@ -27,36 +27,135 @@ from apps.models import (
 MAGazin_PREFIX = 'Magazin '
 
 CATEGORIES = [
-    'Ichimliklar', 'Oziq-ovqat', 'Sut mahsulotlari', 'Shirinliklar',
-    'Kraxmal', "Go'sht mahsulotlari", 'Non va pishiriq', 'Maishiy kimyo',
-    'Muzlatilgan', 'Snacks',
+    'Ichimliklar',
+    'Oziq-ovqat',
+    'Sut mahsulotlari',
+    'Shirinliklar',
+    'Kraxmal',
+    "Go'sht mahsulotlari",
+    'Non va pishiriq',
+    'Maishiy kimyo',
+    'Muzlatilgan',
+    'Snacks',
 ]
 
 PRODUCT_STEMS = [
-    'Cola', 'Pepsi', 'Fanta', 'Sprite', 'Suv', 'Choy', 'Qahva', 'Sut', 'Qatiq',
-    'Smetana', 'Pishloq', 'Non', 'Baton', "Lay's", 'Pringles', 'Snickers',
-    'Mars', 'Twix', 'Shokolad', 'Pechenye', 'Guruch', 'Makaron', 'Un', "Yog'",
-    'Tuxum', 'Kolbasa', 'Sosiska', "Go'sht", 'Tovuq', 'Baliq', 'Sabzi', 'Kartoshka',
-    'Piyoz', 'Olma', 'Banan', 'Uzum', 'Detergent', 'Shampun', 'Sovun', 'Salfetka',
+    'Cola',
+    'Pepsi',
+    'Fanta',
+    'Sprite',
+    'Suv',
+    'Choy',
+    'Qahva',
+    'Sut',
+    'Qatiq',
+    'Smetana',
+    'Pishloq',
+    'Non',
+    'Baton',
+    "Lay's",
+    'Pringles',
+    'Snickers',
+    'Mars',
+    'Twix',
+    'Shokolad',
+    'Pechenye',
+    'Guruch',
+    'Makaron',
+    'Un',
+    "Yog'",
+    'Tuxum',
+    'Kolbasa',
+    'Sosiska',
+    "Go'sht",
+    'Tovuq',
+    'Baliq',
+    'Sabzi',
+    'Kartoshka',
+    'Piyoz',
+    'Olma',
+    'Banan',
+    'Uzum',
+    'Detergent',
+    'Shampun',
+    'Sovun',
+    'Salfetka',
 ]
 
 SUPPLIER_STEMS = [
-    'Coca-Cola', 'PepsiCo', 'Nestle', 'Lactalis', 'Azersun', 'Olmaliq',
-    'Artel Food', 'Registan', 'Samarqand Non', "Toshkent Go'sht", 'UzSnacks',
-    'Shirin', 'Bonduelle', 'Makro', 'Baraka', 'Navbahor', 'Oqtepa',
-    'Milliy Diler', 'Fresh Market', 'Optom UZ', 'Bozor Link', 'Asia Trade',
+    'Coca-Cola',
+    'PepsiCo',
+    'Nestle',
+    'Lactalis',
+    'Azersun',
+    'Olmaliq',
+    'Artel Food',
+    'Registan',
+    'Samarqand Non',
+    "Toshkent Go'sht",
+    'UzSnacks',
+    'Shirin',
+    'Bonduelle',
+    'Makro',
+    'Baraka',
+    'Navbahor',
+    'Oqtepa',
+    'Milliy Diler',
+    'Fresh Market',
+    'Optom UZ',
+    'Bozor Link',
+    'Asia Trade',
 ]
 
 FIRST_NAMES = [
-    'Aziz', 'Bobur', 'Dilshod', 'Eldor', 'Farhod', 'G\'olib', 'Hamid', 'Ibrohim',
-    'Javohir', 'Kamol', 'Laziz', 'Mirzo', 'Nodir', 'Otabek', 'Parviz', 'Rustam',
-    'Sardor', 'Timur', 'Ulug\'bek', 'Vali', 'Zafar', 'Shohruh', 'Bekzod', 'Doniyor',
-    'Malika', 'Nigora', 'Zilola', 'Dilnoza', 'Gulnora', 'Sevara', 'Madina', 'Nilufar',
+    'Aziz',
+    'Bobur',
+    'Dilshod',
+    'Eldor',
+    'Farhod',
+    "G'olib",
+    'Hamid',
+    'Ibrohim',
+    'Javohir',
+    'Kamol',
+    'Laziz',
+    'Mirzo',
+    'Nodir',
+    'Otabek',
+    'Parviz',
+    'Rustam',
+    'Sardor',
+    'Timur',
+    "Ulug'bek",
+    'Vali',
+    'Zafar',
+    'Shohruh',
+    'Bekzod',
+    'Doniyor',
+    'Malika',
+    'Nigora',
+    'Zilola',
+    'Dilnoza',
+    'Gulnora',
+    'Sevara',
+    'Madina',
+    'Nilufar',
 ]
 
 LAST_NAMES = [
-    'Karimov', 'Tursunov', 'Rahimov', 'Saidov', 'Yusupov', 'Alimov', 'Nazarov',
-    'Mirzayev', 'Qodirov', 'Ergashev', 'Xolmatov', 'Ismoilov', 'Abdurahmonov',
+    'Karimov',
+    'Tursunov',
+    'Rahimov',
+    'Saidov',
+    'Yusupov',
+    'Alimov',
+    'Nazarov',
+    'Mirzayev',
+    'Qodirov',
+    'Ergashev',
+    'Xolmatov',
+    'Ismoilov',
+    'Abdurahmonov',
 ]
 
 SIZES = ['250g', '500g', '1kg', '1L', '0.5L', '1.5L', '330ml', '50g', '100g', 'dona']
@@ -79,7 +178,7 @@ def money(value):
 
 
 def weighted_choice(pairs):
-    items, weights = zip(*pairs)
+    items, weights = zip(*pairs, strict=False)
     return random.choices(items, weights=weights, k=1)[0]
 
 
@@ -108,9 +207,7 @@ def list_store_numbers(count=100):
 
 def get_store_branches(store_n: int):
     primary = primary_branch_name(store_n)
-    branches = list(
-        Branch.objects.filter(name__startswith=primary).order_by('name')
-    )
+    branches = list(Branch.objects.filter(name__startswith=primary).order_by('name'))
     return branches
 
 
@@ -141,11 +238,13 @@ def build_cart_lines(products, target_amount):
             max_qty = max(1, int(remaining / prod.selling_price))
             qty = random.randint(1, min(2, max_qty))
         qty = max(1, min(qty, 8))
-        lines.append({
-            'product_name': prod.name,
-            'quantity': qty,
-            'unit_price': prod.selling_price,
-        })
+        lines.append(
+            {
+                'product_name': prod.name,
+                'quantity': qty,
+                'unit_price': prod.selling_price,
+            }
+        )
         remaining -= prod.selling_price * qty
         if remaining <= 0:
             break
@@ -153,11 +252,13 @@ def build_cart_lines(products, target_amount):
     if not lines:
         prod = affordable[0]
         qty = max(1, min(8, int(target_amount / prod.selling_price)))
-        lines.append({
-            'product_name': prod.name,
-            'quantity': qty,
-            'unit_price': prod.selling_price,
-        })
+        lines.append(
+            {
+                'product_name': prod.name,
+                'quantity': qty,
+                'unit_price': prod.selling_price,
+            }
+        )
     return lines
 
 
@@ -333,18 +434,20 @@ def seed_store_products(store_n, categories, products_min=500, products_max=1000
             cost = money(random.randint(3_000, 95_000))
             price = money(cost * Decimal(str(random.uniform(1.1, 1.4))))
             stock = random.randint(50, 800)
-            batch.append(Product(
-                name=name[:50],
-                barcode=barcode_for(store_idx, base_idx + pi),
-                category=random.choice(categories),
-                branch=branch,
-                selling_price=price,
-                base_price=cost,
-                emoji=random.choice(EMOJIS),
-                size=size,
-                unit=random.choice(UNITS),
-                stock=stock,
-            ))
+            batch.append(
+                Product(
+                    name=name[:50],
+                    barcode=barcode_for(store_idx, base_idx + pi),
+                    category=random.choice(categories),
+                    branch=branch,
+                    selling_price=price,
+                    base_price=cost,
+                    emoji=random.choice(EMOJIS),
+                    size=size,
+                    unit=random.choice(UNITS),
+                    stock=stock,
+                )
+            )
 
         created = Product.objects.bulk_create(batch, batch_size=300)
         inv = [InventoryItem(product=p, warehouse=warehouse, quantity=p.stock) for p in created]
@@ -378,16 +481,18 @@ def seed_store_suppliers(store_n, suppliers_min=30, suppliers_max=50, force=Fals
         phone_base += 1
         stem = random.choice(SUPPLIER_STEMS)
         name = f'{stem} {store_n}-{i + 1}'[:50]
-        suppliers.append(Supplier(
-            branch=primary,
-            name=name,
-            phone=str(phone_base),
-            address=f'{primary.name} tumani',
-            agent_name=f'{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}',
-            agent_phone=str(phone_base + 50_000),
-            total_orders=random.randint(5, 120),
-            status='Faol',
-        ))
+        suppliers.append(
+            Supplier(
+                branch=primary,
+                name=name,
+                phone=str(phone_base),
+                address=f'{primary.name} tumani',
+                agent_name=f'{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}',
+                agent_phone=str(phone_base + 50_000),
+                total_orders=random.randint(5, 120),
+                status='Faol',
+            )
+        )
 
     Supplier.objects.bulk_create(suppliers, batch_size=200)
     created = list(Supplier.objects.filter(branch=primary).order_by('-id')[:target])
@@ -397,16 +502,18 @@ def seed_store_suppliers(store_n, suppliers_min=30, suppliers_max=50, force=Fals
         pick_count = min(random.randint(8, 25), len(products))
         picks = random.sample(products, k=pick_count)
         for prod in picks:
-            catalog_batch.append(SupplierCatalogItem(
-                supplier=sup,
-                name=prod.name,
-                category=prod.category.name if prod.category else '',
-                default_cost=prod.base_price,
-                size=prod.size or '',
-                unit=prod.unit or 'dona',
-                barcode=prod.barcode,
-                product=prod,
-            ))
+            catalog_batch.append(
+                SupplierCatalogItem(
+                    supplier=sup,
+                    name=prod.name,
+                    category=prod.category.name if prod.category else '',
+                    default_cost=prod.base_price,
+                    size=prod.size or '',
+                    unit=prod.unit or 'dona',
+                    barcode=prod.barcode,
+                    product=prod,
+                )
+            )
 
     SupplierCatalogItem.objects.bulk_create(catalog_batch, batch_size=500)
     return len(created), len(catalog_batch)
@@ -429,14 +536,16 @@ def seed_store_debtors(store_n, debtors_min=200, debtors_max=300, force=False):
 
     phone_base = 940_000_000 + store_n * 1000
     batch = []
-    for i in range(target):
+    for _i in range(target):
         phone_base += 1
-        batch.append(CreditAccount(
-            branch=primary,
-            customer_name=f'{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}',
-            phone=str(phone_base),
-            balance=Decimal('0'),
-        ))
+        batch.append(
+            CreditAccount(
+                branch=primary,
+                customer_name=f'{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}',
+                phone=str(phone_base),
+                balance=Decimal('0'),
+            )
+        )
     CreditAccount.objects.bulk_create(batch, batch_size=300)
     return target
 
@@ -477,7 +586,7 @@ def _create_sale_batch_multi(
         if not lines:
             continue
 
-        amount = money(sum(Decimal(str(l['quantity'])) * l['unit_price'] for l in lines))
+        amount = money(sum(Decimal(str(lines['quantity'])) * lines['unit_price'] for lines in lines))
         if amount <= 0:
             continue
 
@@ -489,18 +598,20 @@ def _create_sale_batch_multi(
         sale_seq += 1
 
         cashier = random.choice(cashiers) if cashiers else None
-        sales_data.append({
-            'branch': branch,
-            'external_id': external_id,
-            'date': sale_date,
-            'time': f'{hour:02d}:{minute:02d}',
-            'amount': amount,
-            'method': method,
-            'payment_breakdown': breakdown,
-            'cashier': cashier,
-            'cashier_name': cashier.full_name if cashier else 'Kassir',
-            'lines': lines,
-        })
+        sales_data.append(
+            {
+                'branch': branch,
+                'external_id': external_id,
+                'date': sale_date,
+                'time': f'{hour:02d}:{minute:02d}',
+                'amount': amount,
+                'method': method,
+                'payment_breakdown': breakdown,
+                'cashier': cashier,
+                'cashier_name': cashier.full_name if cashier else 'Kassir',
+                'lines': lines,
+            }
+        )
         total_revenue += amount
 
     return sales_data, sale_seq, total_revenue
@@ -547,11 +658,14 @@ def _persist_sales(sales_data, debtors):
             payment_breakdown=d.get('payment_breakdown') or {},
             cashier=d['cashier'],
             cashier_name=d['cashier_name'],
-            items=[{
-                'name': l['product_name'],
-                'qty': l['quantity'],
-                'price': float(l['unit_price']),
-            } for l in d['lines']],
+            items=[
+                {
+                    'name': lines['product_name'],
+                    'qty': lines['quantity'],
+                    'price': float(lines['unit_price']),
+                }
+                for lines in d['lines']
+            ],
         )
         for d in sales_data
     ]
@@ -561,14 +675,16 @@ def _persist_sales(sales_data, debtors):
     credit_charges = []
     accounts_to_update = {}
 
-    for sale_obj, d in zip(created, sales_data):
+    for sale_obj, d in zip(created, sales_data, strict=False):
         for line in d['lines']:
-            lines_batch.append(SaleLine(
-                sale=sale_obj,
-                product_name=line['product_name'],
-                quantity=line['quantity'],
-                unit_price=line['unit_price'],
-            ))
+            lines_batch.append(
+                SaleLine(
+                    sale=sale_obj,
+                    product_name=line['product_name'],
+                    quantity=line['quantity'],
+                    unit_price=line['unit_price'],
+                )
+            )
 
         if d['method'] != 'Nasiya' or not debtors:
             continue
@@ -576,20 +692,24 @@ def _persist_sales(sales_data, debtors):
         current = accounts_to_update.get(acc.id, acc)
         current.balance = money(current.balance + d['amount'])
         accounts_to_update[acc.id] = current
-        credit_charges.append(CreditTransaction(
-            account=current,
-            kind=CreditTransaction.Kind.CHARGE,
-            amount=d['amount'],
-            sale=sale_obj,
-            cashier_name=d['cashier_name'],
-            note='Nasiya savdo',
-        ))
+        credit_charges.append(
+            CreditTransaction(
+                account=current,
+                kind=CreditTransaction.Kind.CHARGE,
+                amount=d['amount'],
+                sale=sale_obj,
+                cashier_name=d['cashier_name'],
+                note='Nasiya savdo',
+            )
+        )
 
     SaleLine.objects.bulk_create(lines_batch, batch_size=500)
     if credit_charges:
         CreditTransaction.objects.bulk_create(credit_charges, batch_size=300)
         CreditAccount.objects.bulk_update(
-            list(accounts_to_update.values()), ['balance'], batch_size=200,
+            list(accounts_to_update.values()),
+            ['balance'],
+            batch_size=200,
         )
 
     total = sum(d['amount'] for d in sales_data)
@@ -618,10 +738,7 @@ def seed_store_sales(
         CreditTransaction.objects.filter(account__branch=primary, kind='charge').delete()
         CreditAccount.objects.filter(branch=primary).update(balance=Decimal('0'))
 
-    products_by_branch = {
-        b.id: list(Product.objects.filter(branch=b))
-        for b in branches
-    }
+    products_by_branch = {b.id: list(Product.objects.filter(branch=b)) for b in branches}
     if not any(products_by_branch.values()):
         return {'sales': 0, 'revenue': Decimal('0'), 'next_seq': sale_seq_start}
 
@@ -648,8 +765,15 @@ def seed_store_sales(
 
     if activity == 'active':
         today_batch, sale_seq, _ = _create_sale_batch_multi(
-            branch_pool, products_by_branch, today, today_count, today_target,
-            cashiers, debtors, code, sale_seq,
+            branch_pool,
+            products_by_branch,
+            today,
+            today_count,
+            today_target,
+            cashiers,
+            debtors,
+            code,
+            sale_seq,
         )
         all_sales_data.extend(today_batch)
         for day_offset in range(1, min(history_days, 7) + 1):
@@ -657,8 +781,15 @@ def seed_store_sales(
             day_count = random.randint(80, 150)
             day_revenue = money(today_target * Decimal('0.12'))
             day_batch, sale_seq, _ = _create_sale_batch_multi(
-                branch_pool, products_by_branch, sale_date, day_count, day_revenue,
-                cashiers, debtors, code, sale_seq,
+                branch_pool,
+                products_by_branch,
+                sale_date,
+                day_count,
+                day_revenue,
+                cashiers,
+                debtors,
+                code,
+                sale_seq,
             )
             all_sales_data.extend(day_batch)
     elif activity == 'low':
@@ -668,8 +799,15 @@ def seed_store_sales(
             day_count = random.randint(40, 90)
             day_revenue = money(today_target * Decimal('0.08'))
             day_batch, sale_seq, _ = _create_sale_batch_multi(
-                branch_pool, products_by_branch, sale_date, day_count, day_revenue,
-                cashiers, debtors, code, sale_seq,
+                branch_pool,
+                products_by_branch,
+                sale_date,
+                day_count,
+                day_revenue,
+                cashiers,
+                debtors,
+                code,
+                sale_seq,
             )
             all_sales_data.extend(day_batch)
     else:
@@ -679,8 +817,15 @@ def seed_store_sales(
             day_count = random.randint(30, 70)
             day_revenue = money(today_target * Decimal('0.06'))
             day_batch, sale_seq, _ = _create_sale_batch_multi(
-                branch_pool, products_by_branch, sale_date, day_count, day_revenue,
-                cashiers, debtors, code, sale_seq,
+                branch_pool,
+                products_by_branch,
+                sale_date,
+                day_count,
+                day_revenue,
+                cashiers,
+                debtors,
+                code,
+                sale_seq,
             )
             all_sales_data.extend(day_batch)
 

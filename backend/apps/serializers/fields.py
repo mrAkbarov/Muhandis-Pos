@@ -3,7 +3,7 @@ from rest_framework.serializers import (
     ValidationError,
 )
 
-from apps.validators.phone import normalize_uz_phone, validate_uz_phone
+from apps.validators.phone import normalize_uz_phone
 
 
 class UzPhoneField(CharField):

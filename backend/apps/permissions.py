@@ -1,7 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from apps.models import User
-from apps.services.branch_access import user_has_global_branch_access
 
 
 def is_platform_owner(user) -> bool:

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import (
     CASCADE,
     CharField,
@@ -28,23 +27,11 @@ class Warehouse(TimeStampedModel):
 class InventoryItem(TimeStampedModel):
     """Mahsulot qoldig'i — ombor bo'yicha."""
 
-    product = ForeignKey(
-        'apps.Product',
-        CASCADE,
-        related_name='inventory_items',
-        verbose_name='Mahsulot',
-    )
-    warehouse = ForeignKey(
-        "apps.Warehouse",
-        CASCADE,
-        related_name='items',
-        verbose_name='Ombor',
-    )
+    product = ForeignKey('apps.Product', CASCADE, related_name='inventory_items', verbose_name='Mahsulot')
+    warehouse = ForeignKey('apps.Warehouse', CASCADE, related_name='items', verbose_name='Ombor')
     quantity = PositiveIntegerField(default=0, verbose_name='Miqdor')
 
     class Meta:
-        verbose_name = 'Ombor qoldig\'i'
-        verbose_name_plural = 'Ombor qoldiqlari'
         constraints = [
             UniqueConstraint(
                 fields=['product', 'warehouse'],

@@ -34,21 +34,23 @@ class PrintReceiptAPIView(APIView):
     def post(self, request):
         receipt = request.data
         if not receipt or not receipt.get('items'):
-            return Response({'detail': 'Chek ma\'lumoti kerak'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': "Chek ma'lumoti kerak"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             result = print_receipt(receipt)
         except FileNotFoundError:
             return Response(
-                {'detail': 'lp buyrug\'i topilmadi. cups-client o\'rnatilganmi?'},
+                {'detail': "lp buyrug'i topilmadi. cups-client o'rnatilganmi?"},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except RuntimeError as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
-        return Response({
-            'detail': 'Chek printerga yuborildi',
-            'method': result.get('method'),
-            'target': result.get('target'),
-        })
+        return Response(
+            {
+                'detail': 'Chek printerga yuborildi',
+                'method': result.get('method'),
+                'target': result.get('target'),
+            }
+        )
 
     def get(self, request):
         return Response({'printer': get_printer_name()})

@@ -2,7 +2,7 @@
 
 import random
 from datetime import timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -40,7 +40,7 @@ def money(value):
 
 
 def weighted_choice(pairs):
-    items, weights = zip(*pairs)
+    items, weights = zip(*pairs, strict=False)
     return random.choices(items, weights=weights, k=1)[0]
 
 
@@ -164,7 +164,7 @@ class Command(BaseCommand):
 
         debtors = []
         phone_base = 940_000_000 + int(store_code.replace('M', '') or '0') * 100
-        for i in range(debtors_n):
+        for _i in range(debtors_n):
             phone_base += 1
             debtors.append(CreditAccount(
                 branch=branch,
@@ -196,7 +196,7 @@ class Command(BaseCommand):
             if not lines:
                 continue
 
-            amount = money(sum(Decimal(str(l['quantity'])) * l['unit_price'] for l in lines))
+            amount = money(sum(Decimal(str(line['quantity'])) * line['unit_price'] for line in lines))
             method = weighted_choice(PAYMENT_METHODS)
             hour = random.randint(8, 22)
             minute = random.randint(0, 59)
@@ -214,16 +214,16 @@ class Command(BaseCommand):
                 cashier=cashier,
                 cashier_name=cashier.full_name if cashier else 'Kassir',
                 items=[{
-                    'name': l['product_name'],
-                    'qty': l['quantity'],
-                    'price': float(l['unit_price']),
-                } for l in lines],
+                    'name': line['product_name'],
+                    'qty': line['quantity'],
+                    'price': float(line['unit_price']),
+                } for line in lines],
             )
             sales_batch.append((sale, lines, method))
 
         created_sales = Sale.objects.bulk_create([s[0] for s in sales_batch], batch_size=300)
 
-        for (sale_obj, lines, method), created in zip(sales_batch, created_sales):
+        for (sale_obj, lines, method), created in zip(sales_batch, created_sales, strict=False):
             for line in lines:
                 lines_batch.append(SaleLine(
                     sale=created,

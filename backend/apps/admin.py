@@ -2,9 +2,21 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from apps.models import (
-    User, Branch, Category, Product, Supplier, SupplierCatalogItem,
-    Warehouse, InventoryItem, Sale, SaleLine, PurchaseOrder, PurchaseOrderLine,
-    AgentOrder, CreditAccount, CreditTransaction,
+    AgentOrder,
+    Branch,
+    Category,
+    CreditAccount,
+    CreditTransaction,
+    InventoryItem,
+    Product,
+    PurchaseOrder,
+    PurchaseOrderLine,
+    Sale,
+    SaleLine,
+    Supplier,
+    SupplierCatalogItem,
+    User,
+    Warehouse,
 )
 
 

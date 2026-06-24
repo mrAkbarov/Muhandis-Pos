@@ -4,11 +4,20 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.models import (
-    User, Branch, Category, Product, Supplier, SupplierCatalogItem,
-    Warehouse, InventoryItem, Sale, PurchaseOrder, PurchaseOrderLine,
-    CreditAccount, AgentOrder,
+    AgentOrder,
+    Branch,
+    Category,
+    CreditAccount,
+    InventoryItem,
+    Product,
+    PurchaseOrder,
+    PurchaseOrderLine,
+    Sale,
+    Supplier,
+    SupplierCatalogItem,
+    User,
+    Warehouse,
 )
-
 
 DEMO_USERS = [
     dict(username='admin', password='123', first_name='Adminstrator', last_name='—', role='admin',

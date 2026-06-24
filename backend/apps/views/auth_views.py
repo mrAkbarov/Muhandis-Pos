@@ -7,7 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.models import User
-from apps.serializers.auth_serializers import RegisterModelSerializer, LoginModelSerializer
+from apps.serializers.auth_serializers import LoginModelSerializer, RegisterModelSerializer
 
 
 @extend_schema(tags=['Auth'])
@@ -23,32 +23,31 @@ class LoginAPIView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = self.serializer_class(
-            data=request.data,
-            context={'request': request}
-        )
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
         branch = user.branch
-        return Response({
-            'message': 'Login successful',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'access_token': str(refresh.access_token),
-            'refresh_token': str(refresh),
-            'user': {
-                'id': str(user.id),
-                'username': user.username,
-                'phone': user.phone,
-                'name': user.full_name,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'role': user.role,
-                'active': user.is_active,
-                'branch': str(user.branch_id) if user.branch_id else None,
-                'branch_name': branch.name if branch else None,
-                'branch_code': branch.name.split()[-1] if branch and branch.name else None,
-                'is_global_admin': user.role == User.Role.ADMIN and not user.branch_id,
-            },
-        })
+        return Response(
+            {
+                'message': 'Login successful',
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'access_token': str(refresh.access_token),
+                'refresh_token': str(refresh),
+                'user': {
+                    'id': str(user.id),
+                    'username': user.username,
+                    'phone': user.phone,
+                    'name': user.full_name,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'role': user.role,
+                    'active': user.is_active,
+                    'branch': str(user.branch_id) if user.branch_id else None,
+                    'branch_name': branch.name if branch else None,
+                    'branch_code': branch.name.split()[-1] if branch and branch.name else None,
+                    'is_global_admin': user.role == User.Role.ADMIN and not user.branch_id,
+                },
+            }
+        )

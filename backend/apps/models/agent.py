@@ -15,8 +15,6 @@ class AgentOrder(TimeStampedModel):
     date = DateField(verbose_name='Sana')
 
     class Meta:
-        verbose_name = 'Agent buyurtmasi'
-        verbose_name_plural = 'Agent buyurtmalari'
         ordering = ['-date']
 
     def __str__(self):

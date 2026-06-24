@@ -4,8 +4,6 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from apps.models import CreditAccount, CreditTransaction
-
-
 from apps.validators.phone import normalize_uz_phone
 
 

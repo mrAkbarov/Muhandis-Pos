@@ -1,6 +1,7 @@
 from io import BytesIO
-from PIL import Image
+
 from django.core.files.base import ContentFile
+from PIL import Image
 
 
 def save_product_image_as_webp(product, uploaded_file):

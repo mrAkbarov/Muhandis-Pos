@@ -1,36 +1,48 @@
-from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
-from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.models import (
-    Category, Product, Supplier, SupplierCatalogItem, Warehouse, InventoryItem,
-    Sale, PosCartDraft, PurchaseOrder, AgentOrder, User, CreditAccount,
+    AgentOrder,
+    Category,
+    CreditAccount,
+    InventoryItem,
+    PosCartDraft,
+    PurchaseOrder,
+    Sale,
+    Supplier,
+    SupplierCatalogItem,
+    User,
+    Warehouse,
 )
 from apps.models.base import PurchaseOrderStatus
+from apps.permissions import IsAuthenticatedNotPlatformOwnerWriter, is_platform_owner
 from apps.serializers.pos_serializers import (
-    SupplierSerializer, SupplierCatalogItemSerializer, WarehouseSerializer, InventoryItemSerializer,
-    SaleSerializer, PosCartDraftSerializer, PurchaseOrderSerializer, PurchaseReceiveSerializer,
     AgentOrderSerializer,
-    UserStaffSerializer, StaffCreateSerializer,
-    CreditAccountSerializer, CreditPaymentSerializer,
+    CreditAccountSerializer,
+    CreditPaymentSerializer,
+    InventoryItemSerializer,
+    PosCartDraftSerializer,
+    PurchaseOrderSerializer,
+    PurchaseReceiveSerializer,
+    SaleSerializer,
+    StaffCreateSerializer,
+    SupplierCatalogItemSerializer,
+    SupplierSerializer,
+    UserStaffSerializer,
+    WarehouseSerializer,
 )
 from apps.serializers.product_serializers import CategorySerializer, ProductSerializer
+from apps.services.branch_access import filter_queryset_by_user_branch, user_has_global_branch_access
 from apps.services.catalog import register_catalog_item_as_product
 from apps.services.credit import record_credit_payment
-from apps.services.product_image import save_product_image_as_webp
 from apps.services.purchase import receive_purchase_order
-
-
-from apps.permissions import IsAuthenticatedNotPlatformOwnerWriter, is_platform_owner
-from apps.services.branch_access import filter_queryset_by_user_branch, user_has_global_branch_access
 
 API_PERMISSIONS = [IsAuthenticated, IsAuthenticatedNotPlatformOwnerWriter]
 
@@ -56,42 +68,8 @@ class CategoryViewSet(ModelViewSet):
     search_fields = ['name']
 
     def get_queryset(self):
-        return Category.objects.all().order_by('name')
-
-
-@extend_schema(tags=['Product'])
-class ProductViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = Product.objects.select_related('category', 'branch').all()
-    serializer_class = ProductSerializer
-    permission_classes = API_PERMISSIONS
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['branch', 'category']
-    search_fields = ['name', 'barcode', 'category__name']
-    ordering_fields = ['name', 'stock', 'selling_price']
-
-    def destroy(self, request, *args, **kwargs):
-        product = self.get_object()
-        inv_total = (
-            InventoryItem.objects.filter(product=product).aggregate(total=Sum('quantity'))['total'] or 0
-        )
-        if inv_total != 0:
-            return Response(
-                {'detail': 'Faqat qoldiqi 0 ta bo\'lgan mahsulotni o\'chirish mumkin'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return super().destroy(request, *args, **kwargs)
-
-    @extend_schema(request={'multipart/form-data': {'type': 'object', 'properties': {
-        'image': {'type': 'string', 'format': 'binary'},
-    }}}, responses=ProductSerializer)
-    @action(detail=True, methods=['post'], url_path='upload-image', parser_classes=[MultiPartParser, FormParser])
-    def upload_image(self, request, pk=None):
-        product = self.get_object()
-        uploaded = request.FILES.get('image')
-        if not uploaded:
-            return Response({'detail': 'Rasm fayli kerak'}, status=status.HTTP_400_BAD_REQUEST)
-        save_product_image_as_webp(product, uploaded)
-        return Response(ProductSerializer(product, context={'request': request}).data)
+        qs = super().get_queryset()
+        return qs.order_by('name')
 
 
 @extend_schema(tags=['Supplier'])
@@ -102,10 +80,15 @@ class SupplierViewSet(BranchScopedMixin, ModelViewSet):
     filterset_fields = ['branch', 'status']
 
     @extend_schema(
-        request={'application/json': {'type': 'object', 'properties': {
-            'catalog_item_id': {'type': 'integer'},
-            'selling_price': {'type': 'number'},
-        }}},
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'catalog_item_id': {'type': 'integer'},
+                    'selling_price': {'type': 'number'},
+                },
+            }
+        },
         responses=ProductSerializer,
     )
     @action(detail=True, methods=['post'], url_path='register-catalog-product')
@@ -131,8 +114,7 @@ class SupplierViewSet(BranchScopedMixin, ModelViewSet):
             status=status.HTTP_200_OK if already_linked else status.HTTP_201_CREATED,
         )
 
-    @extend_schema(request=SupplierCatalogItemSerializer, responses=SupplierCatalogItemSerializer)
-    @action(detail=True, methods=['post'], url_path='catalog')
+    @action(detail=True, methods=['post'], url_path='catalog', serializer_class=SupplierCatalogItemSerializer)
     def add_catalog_item(self, request, pk=None):
         from decimal import Decimal
 
@@ -140,7 +122,7 @@ class SupplierViewSet(BranchScopedMixin, ModelViewSet):
         data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
         if not data.get('category'):
             data['category'] = data.get('category') or ''
-        serializer = SupplierCatalogItemSerializer(data=data)
+        serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         item = serializer.save(supplier=supplier)
         cost = item.default_cost or Decimal('0')
@@ -152,12 +134,12 @@ class SupplierViewSet(BranchScopedMixin, ModelViewSet):
             barcode=(item.barcode or '').strip() or None,
         )
         item.refresh_from_db()
-        return Response(SupplierCatalogItemSerializer(item).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(item).data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=['Warehouse'])
 class WarehouseViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = Warehouse.objects.select_related('branch').all()
+    queryset = Warehouse.objects.select_related('branch')
     serializer_class = WarehouseSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch']
@@ -165,7 +147,7 @@ class WarehouseViewSet(BranchScopedMixin, ModelViewSet):
 
 @extend_schema(tags=['Inventory'])
 class InventoryViewSet(ModelViewSet):
-    queryset = InventoryItem.objects.select_related('product', 'warehouse').all()
+    queryset = InventoryItem.objects.select_related('product', 'warehouse')
     serializer_class = InventoryItemSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['warehouse', 'product']
@@ -197,22 +179,22 @@ class PosCartDraftViewSet(BranchScopedMixin, ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if self.request.user.role == User.Role.ADMIN:
+        if self.request.user.is_admin:
             return qs
         return qs.filter(cashier=self.request.user)
 
     def perform_create(self, serializer):
         branch = serializer.validated_data['branch']
+
         count = PosCartDraft.objects.filter(branch=branch, cashier=self.request.user, is_draft=True).count()
         if count >= MAX_POS_DRAFTS:
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError({'detail': f'Eng ko\'pi bilan {MAX_POS_DRAFTS} ta chernovik saqlash mumkin'})
+            raise ValidationError({'detail': f"Eng ko'pi bilan {MAX_POS_DRAFTS} ta chernovik saqlash mumkin"})
         serializer.save(cashier=self.request.user, is_draft=True)
 
 
 @extend_schema(tags=['Sale'])
 class SaleViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = Sale.objects.select_related('branch', 'cashier').prefetch_related('lines').all()
+    queryset = Sale.objects.select_related('branch', 'cashier').prefetch_related('lines')
     serializer_class = SaleSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'date', 'method']
@@ -241,7 +223,7 @@ class SaleViewSet(BranchScopedMixin, ModelViewSet):
 
 @extend_schema(tags=['Purchase'])
 class PurchaseOrderViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = PurchaseOrder.objects.select_related('supplier', 'branch').prefetch_related('lines').all()
+    queryset = PurchaseOrder.objects.select_related('supplier', 'branch').prefetch_related('lines')
     serializer_class = PurchaseOrderSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'status', 'supplier']
@@ -269,7 +251,7 @@ class PurchaseOrderViewSet(BranchScopedMixin, ModelViewSet):
 
 @extend_schema(tags=['Agent order'])
 class AgentOrderViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = AgentOrder.objects.select_related('supplier', 'branch').all()
+    queryset = AgentOrder.objects.select_related('supplier', 'branch')
     serializer_class = AgentOrderSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'supplier']
@@ -277,7 +259,7 @@ class AgentOrderViewSet(BranchScopedMixin, ModelViewSet):
 
 @extend_schema(tags=['Credit'])
 class CreditAccountViewSet(BranchScopedMixin, ModelViewSet):
-    queryset = CreditAccount.objects.select_related('branch').prefetch_related('transactions').all()
+    queryset = CreditAccount.objects.select_related('branch').prefetch_related('transactions')
     serializer_class = CreditAccountSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch']
@@ -306,7 +288,7 @@ class CreditAccountViewSet(BranchScopedMixin, ModelViewSet):
 
 @extend_schema(tags=['Staff'])
 class UserStaffViewSet(ModelViewSet):
-    queryset = User.objects.select_related('branch').all()
+    queryset = User.objects.select_related('branch')
     serializer_class = UserStaffSerializer
     permission_classes = API_PERMISSIONS
     http_method_names = ['get', 'head', 'options']
@@ -329,12 +311,12 @@ class StaffCreateAPIView(GenericAPIView):
     def post(self, request):
         if is_platform_owner(request.user):
             return Response(
-                {'detail': 'Platform egasi faqat ko\'ruvchi rejimda'},
+                {'detail': "Platform egasi faqat ko'ruvchi rejimda"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         if request.user.role not in (User.Role.ADMIN, User.Role.BOSS):
             return Response(
-                {'detail': 'Faqat admin yoki boss xodim qo\'sha oladi'},
+                {'detail': "Faqat admin yoki boss xodim qo'sha oladi"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         serializer = self.get_serializer(data=request.data)

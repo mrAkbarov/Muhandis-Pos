@@ -1,16 +1,17 @@
-from apps.views.auth_views import RegisterModelViewSet, LoginAPIView
-from apps.views.product_views import BranchModelViewSet
+from apps.views.auth_views import LoginAPIView, RegisterModelViewSet
+from apps.views.platform_views import BranchModelViewSet
 from apps.views.pos_views import (
+    AgentOrderViewSet,
     CategoryViewSet,
-    ProductViewSet,
-    SupplierViewSet,
-    WarehouseViewSet,
+    CreditAccountViewSet,
     InventoryViewSet,
-    SaleViewSet,
     PosCartDraftViewSet,
     PurchaseOrderViewSet,
-    AgentOrderViewSet,
-    CreditAccountViewSet,
-    UserStaffViewSet,
+    SaleViewSet,
     StaffCreateAPIView,
+    SupplierViewSet,
+    UserStaffViewSet,
+    WarehouseViewSet,
 )
+from apps.views.product_views import  ProductViewSet
+

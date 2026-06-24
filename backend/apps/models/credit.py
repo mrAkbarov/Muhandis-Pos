@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import (
     CASCADE,
     SET_NULL,
@@ -73,8 +72,6 @@ class CreditTransaction(TimeStampedModel):
     cashier_name = CharField(max_length=30, blank=True, verbose_name='Kassir')
 
     class Meta:
-        verbose_name = 'Qarz harakati'
-        verbose_name_plural = 'Qarz harakatlari'
         ordering = ['-created_at']
 
     def __str__(self):

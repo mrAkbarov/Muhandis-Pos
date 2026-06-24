@@ -1,5 +1,5 @@
-from django.conf import settings
 from django.db.models import (
+    PROTECT,
     CharField,
     DecimalField,
     ForeignKey,
@@ -7,7 +7,6 @@ from django.db.models import (
     PositiveIntegerField,
     Q,
     UniqueConstraint,
-    PROTECT,
 )
 
 from apps.models.base import TimeStampedModel, branch_foreign_key_nullable
@@ -19,8 +18,6 @@ class Category(TimeStampedModel):
     name = CharField(max_length=50, unique=True, verbose_name='Kategoriya nomi')
 
     class Meta:
-        verbose_name = 'Kategoriya'
-        verbose_name_plural = 'Kategoriyalar'
         ordering = ['name']
 
     def __str__(self):
@@ -33,7 +30,7 @@ class Product(TimeStampedModel):
     name = CharField(max_length=50, verbose_name='Mahsulot nomi')
     barcode = CharField(max_length=14, blank=True, verbose_name='Shtrix-kod')
     category = ForeignKey(
-        "apps.Category",
+        'apps.Category',
         PROTECT,
         related_name='products',
         verbose_name='Kategoriya',
@@ -43,13 +40,11 @@ class Product(TimeStampedModel):
     base_price = DecimalField(max_digits=12, decimal_places=2, verbose_name='Tannarx')
     emoji = CharField(max_length=16, blank=True, default='📦', verbose_name='Emoji')
     image = ImageField(upload_to='products/', blank=True, null=True, verbose_name='Rasm')
-    size = CharField(max_length=50, blank=True, verbose_name='Hajm/og\'irlik')
-    unit = CharField(max_length=20, blank=True, default='dona', verbose_name='O\'lchov birligi')
+    size = CharField(max_length=50, blank=True, verbose_name="Hajm/og'irlik")
+    unit = CharField(max_length=20, blank=True, default='dona', verbose_name="O'lchov birligi")
     stock = PositiveIntegerField(default=0, verbose_name='Umumiy qoldiq')
 
     class Meta:
-        verbose_name = 'Mahsulot'
-        verbose_name_plural = 'Mahsulotlar'
         ordering = ['name']
         constraints = [
             UniqueConstraint(

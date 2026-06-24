@@ -1,23 +1,23 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import SimpleRouter
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.views import (
-    BranchModelViewSet,
-    RegisterModelViewSet,
-    LoginAPIView,
-    CategoryViewSet,
-    ProductViewSet,
-    SupplierViewSet,
-    WarehouseViewSet,
-    InventoryViewSet,
-    SaleViewSet,
-    PosCartDraftViewSet,
-    PurchaseOrderViewSet,
     AgentOrderViewSet,
+    BranchModelViewSet,
+    CategoryViewSet,
     CreditAccountViewSet,
-    UserStaffViewSet,
+    InventoryViewSet,
+    LoginAPIView,
+    PosCartDraftViewSet,
+    ProductViewSet,
+    PurchaseOrderViewSet,
+    RegisterModelViewSet,
+    SaleViewSet,
     StaffCreateAPIView,
+    SupplierViewSet,
+    UserStaffViewSet,
+    WarehouseViewSet,
 )
 from apps.views.platform_views import MagazinStatusAPIView
 from apps.views.print_views import PrintReceiptAPIView
@@ -40,16 +40,26 @@ auth_router = SimpleRouter(trailing_slash=False)
 auth_router.register('register', RegisterModelViewSet, basename='auth-register')
 
 urlpatterns = [
-    path('api/v1/', include([
-        path('platform/magazin-status', MagazinStatusAPIView.as_view(), name='platform-magazin-status'),
-        path('pos/print-receipt', PrintReceiptAPIView.as_view(), name='pos-print-receipt'),
-        path('users/create', StaffCreateAPIView.as_view(), name='staff-create'),
-        path('', include(api_router.urls)),
-        path('token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-        path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
-    ])),
-    path('auth/', include([
-        path('', include(auth_router.urls)),
-        path('login', LoginAPIView.as_view()),
-    ])),
+    path(
+        'api/v1/',
+        include(
+            [
+                path('platform/magazin-status', MagazinStatusAPIView.as_view(), name='platform-magazin-status'),
+                path('pos/print-receipt', PrintReceiptAPIView.as_view(), name='pos-print-receipt'),
+                path('users/create', StaffCreateAPIView.as_view(), name='staff-create'),
+                path('', include(api_router.urls)),
+                path('token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+                path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+            ]
+        ),
+    ),
+    path(
+        'auth/',
+        include(
+            [
+                path('', include(auth_router.urls)),
+                path('login', LoginAPIView.as_view()),
+            ]
+        ),
+    ),
 ]
