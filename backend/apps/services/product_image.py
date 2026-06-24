@@ -1,18 +1,50 @@
 from io import BytesIO
-
 from PIL import Image
 from django.core.files.base import ContentFile
 
 
 def save_product_image_as_webp(product, uploaded_file):
     img = Image.open(uploaded_file)
-    if img.mode in ('RGBA', 'P'):
-        img = img.convert('RGB')
-    img.thumbnail((512, 512), Image.Resampling.LANCZOS)
+
+    if img.mode in ("RGBA", "LA", "P"):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(
+            img,
+            mask=img.split()[-1] if len(img.split()) > 3 else None,
+        )
+        img = background
+    else:
+        img = img.convert("RGB")
+
+    target_size = (600, 600)
+
+    img.thumbnail(target_size, Image.Resampling.LANCZOS)
+
+    canvas = Image.new("RGB", target_size, (255, 255, 255))
+
+    x = (target_size[0] - img.width) // 2
+    y = (target_size[1] - img.height) // 2
+
+    canvas.paste(img, (x, y))
+
     buf = BytesIO()
-    img.save(buf, format='WEBP', quality=82, method=6)
+
+    canvas.save(
+        buf,
+        format="WEBP",
+        quality=85,
+        optimize=True,
+    )
+
     buf.seek(0)
+
     if product.image:
         product.image.delete(save=False)
-    product.image.save(f'product_{product.pk}.webp', ContentFile(buf.read()), save=True)
+
+    product.image.save(
+        f"product_{product.pk}.webp",
+        ContentFile(buf.read()),
+        save=True,
+    )
+
     return product
