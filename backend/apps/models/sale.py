@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db.models import (
+    CASCADE,
+    SET_NULL,
     BooleanField,
     CharField,
     DateField,
@@ -28,7 +30,7 @@ class Sale(TimeStampedModel):
     )
     cashier = ForeignKey(
         'apps.User',
-        settings.ON_DELETE_SET_NULL,
+        SET_NULL,
         null=True,
         blank=True,
         related_name='sales',
@@ -49,7 +51,7 @@ class Sale(TimeStampedModel):
 class SaleLine(TimeStampedModel):
     """Sotuv qatori — mahsulot nomi, miqdor, narx."""
 
-    sale = ForeignKey(Sale, settings.ON_DELETE_CASCADE, related_name='lines', verbose_name='Sotuv')
+    sale = ForeignKey("apps.Sale", CASCADE, related_name='lines', verbose_name='Sotuv')
     product_name = CharField(max_length=50, verbose_name='Mahsulot nomi')
     quantity = PositiveIntegerField(verbose_name='Miqdor')
     unit_price = DecimalField(max_digits=12, decimal_places=2, verbose_name='Birlik narxi')

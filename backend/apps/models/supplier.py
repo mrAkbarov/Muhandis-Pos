@@ -1,5 +1,12 @@
 from django.conf import settings
-from django.db.models import CharField, DecimalField, ForeignKey, PositiveIntegerField
+from django.db.models import (
+    CASCADE,
+    SET_NULL,
+    CharField,
+    DecimalField,
+    ForeignKey,
+    PositiveIntegerField,
+)
 
 from apps.models.base import SupplierStatus, TimeStampedModel, branch_foreign_key
 from apps.validators.phone import normalize_uz_phone
@@ -42,8 +49,8 @@ class SupplierCatalogItem(TimeStampedModel):
     """Diler katalogidagi mahsulot — zakaz/prixod orqali Product ga ulanadi."""
 
     supplier = ForeignKey(
-        Supplier,
-        settings.ON_DELETE_CASCADE,
+        "apps.Supplier",
+        CASCADE,
         related_name='catalog',
         verbose_name='Diler',
     )
@@ -56,7 +63,7 @@ class SupplierCatalogItem(TimeStampedModel):
     barcode = CharField(max_length=50, blank=True, verbose_name='Shtrix-kod')
     product = ForeignKey(
         'apps.Product',
-        settings.ON_DELETE_SET_NULL,
+        SET_NULL,
         null=True,
         blank=True,
         related_name='supplier_catalog_items',

@@ -7,6 +7,7 @@ from django.db.models import (
     PositiveIntegerField,
     Q,
     UniqueConstraint,
+    PROTECT,
 )
 
 from apps.models.base import TimeStampedModel, branch_foreign_key_nullable
@@ -32,8 +33,8 @@ class Product(TimeStampedModel):
     name = CharField(max_length=50, verbose_name='Mahsulot nomi')
     barcode = CharField(max_length=14, blank=True, verbose_name='Shtrix-kod')
     category = ForeignKey(
-        Category,
-        settings.ON_DELETE_PROTECT,
+        "apps.Category",
+        PROTECT,
         related_name='products',
         verbose_name='Kategoriya',
     )

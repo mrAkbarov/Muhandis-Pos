@@ -1,8 +1,16 @@
 from django.conf import settings
-from django.db.models import CharField, DecimalField, ForeignKey, Q, TextChoices, UniqueConstraint
+from django.db.models import (
+    CASCADE,
+    SET_NULL,
+    CharField,
+    DecimalField,
+    ForeignKey,
+    Q,
+    TextChoices,
+    UniqueConstraint,
+)
 
 from apps.models.base import TimeStampedModel, branch_foreign_key
-from apps.models.sale import Sale
 from apps.validators.phone import normalize_uz_phone
 
 
@@ -15,7 +23,7 @@ class CreditAccount(TimeStampedModel):
     branch = branch_foreign_key('credit_accounts', verbose_name='Filial')
     customer_name = CharField(max_length=50, verbose_name='Mijoz ismi')
     phone = CharField(max_length=20, blank=True, verbose_name='Telefon')
-    balance = DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name='Qarz qoldig\'i')
+    balance = DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="Qarz qoldig'i")
 
     class Meta:
         verbose_name = 'Qarzdor mijoz'
@@ -43,11 +51,11 @@ class CreditTransaction(TimeStampedModel):
 
     class Kind(TextChoices):
         CHARGE = 'charge', 'Qarz (sotuv)'
-        PAYMENT = 'payment', 'To\'lov'
+        PAYMENT = 'payment', "To'lov"
 
     account = ForeignKey(
-        CreditAccount,
-        settings.ON_DELETE_CASCADE,
+        'apps.CreditAccount',
+        CASCADE,
         related_name='transactions',
         verbose_name='Qarz hisobi',
     )
@@ -55,12 +63,12 @@ class CreditTransaction(TimeStampedModel):
     amount = DecimalField(max_digits=14, decimal_places=2, verbose_name='Summa')
     note = CharField(max_length=20, blank=True, verbose_name='Izoh')
     sale = ForeignKey(
-        Sale,
-        settings.ON_DELETE_SET_NULL,
+        "apps.Sale",
+        SET_NULL,
         null=True,
         blank=True,
         related_name='credit_transactions',
-        verbose_name='Bog\'langan sotuv',
+        verbose_name="Bog'langan sotuv",
     )
     cashier_name = CharField(max_length=30, blank=True, verbose_name='Kassir')
 

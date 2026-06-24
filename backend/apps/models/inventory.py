@@ -1,5 +1,11 @@
 from django.conf import settings
-from django.db.models import CharField, ForeignKey, PositiveIntegerField, UniqueConstraint
+from django.db.models import (
+    CASCADE,
+    CharField,
+    ForeignKey,
+    PositiveIntegerField,
+    UniqueConstraint,
+)
 
 from apps.models.base import TimeStampedModel, branch_foreign_key
 
@@ -24,13 +30,13 @@ class InventoryItem(TimeStampedModel):
 
     product = ForeignKey(
         'apps.Product',
-        settings.ON_DELETE_CASCADE,
+        CASCADE,
         related_name='inventory_items',
         verbose_name='Mahsulot',
     )
     warehouse = ForeignKey(
-        Warehouse,
-        settings.ON_DELETE_CASCADE,
+        "apps.Warehouse",
+        CASCADE,
         related_name='items',
         verbose_name='Ombor',
     )

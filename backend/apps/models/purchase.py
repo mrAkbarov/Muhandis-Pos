@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db.models import (
+    CASCADE,
+    SET_NULL,
     CharField,
     DateField,
     DecimalField,
@@ -40,14 +42,14 @@ class PurchaseOrderLine(TimeStampedModel):
     """Buyurtma qatori — mahsulot, miqdor, hajm."""
 
     order = ForeignKey(
-        PurchaseOrder,
-        settings.ON_DELETE_CASCADE,
+        "apps.PurchaseOrder",
+        CASCADE,
         related_name='lines',
         verbose_name='Buyurtma',
     )
     product = ForeignKey(
         'apps.Product',
-        settings.ON_DELETE_SET_NULL,
+        SET_NULL,
         null=True,
         blank=True,
         verbose_name='Mahsulot',
@@ -60,7 +62,7 @@ class PurchaseOrderLine(TimeStampedModel):
     cost_price = DecimalField(max_digits=12, decimal_places=2, verbose_name='Narx')
     catalog_item = ForeignKey(
         'apps.SupplierCatalogItem',
-        settings.ON_DELETE_SET_NULL,
+        SET_NULL,
         null=True,
         blank=True,
         related_name='order_lines',
