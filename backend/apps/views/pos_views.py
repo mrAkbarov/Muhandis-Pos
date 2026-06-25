@@ -7,6 +7,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import OrderingFilter  # 7 va 9-mashqlar uchun ulandi
 
 from apps.models import (
     AgentOrder,
@@ -262,9 +263,20 @@ class CreditAccountViewSet(BranchScopedMixin, ModelViewSet):
     queryset = CreditAccount.objects.select_related('branch').prefetch_related('transactions')
     serializer_class = CreditAccountSerializer
     permission_classes = API_PERMISSIONS
-    filterset_fields = ['branch']
+
+
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+
+    # phone filtri va search_fields ga telefon raqam qo'shildi
+    filterset_fields = ['branch', 'phone']
     search_fields = ['customer_name', 'phone']
     http_method_names = ['get', 'head', 'options', 'post']
+
+    # balance va created_at bo'yicha saralash
+    ordering_fields = ['balance', 'created_at', 'customer_name']
+
+    # eng oxirgi olingan qarzdor
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return super().get_queryset().filter(balance__gt=0)

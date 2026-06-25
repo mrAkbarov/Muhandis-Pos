@@ -69,13 +69,12 @@ class CreditTransaction(TimeStampedModel):
         related_name='credit_transactions',
         verbose_name="Bog'langan sotuv",
     )
-    cashier_name = CharField(max_length=30, blank=True, verbose_name='Kassir')
+    cashier_name = CharField(max_length=30, blank=True, verbose_name='Kassir ismi')
 
     class Meta:
+        verbose_name = 'Qarz harakati'
+        verbose_name_plural = 'Qarz harakatlari'
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.account.customer_name} {self.kind} {self.amount}'
-
-    KIND_CHARGE = Kind.CHARGE
-    KIND_PAYMENT = Kind.PAYMENT
+        return f'{self.account.customer_name} — {self.kind} — {self.amount}'

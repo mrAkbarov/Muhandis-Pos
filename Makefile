@@ -1,4 +1,4 @@
-.PHONY: mig seed seed-stores seed-bulk seed-magazin-ecosystem seed-magazin-products seed-magazin-suppliers seed-magazin-sales run frontend docker-env docker-up docker-down docker-logs clean lint format dev-sync
+PHONY: mig seed seed-stores seed-bulk seed-magazin-ecosystem seed-magazin-products seed-magazin-suppliers seed-magazin-sales run frontend docker-env docker-up docker-down docker-logs clean lint format dev-sync
 
 dev-sync:
 	cd backend && uv sync --all-groups
