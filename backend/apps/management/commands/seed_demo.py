@@ -833,7 +833,7 @@ class Command(BaseCommand):
 
                 CreditTransaction.objects.create(
                     account=account,
-                    kind=CreditTransaction.KIND_CHARGE,
+                    kind=CreditTransaction.Kind.CHARGE,
                     amount=amount,
                     cashier_name=random.choice(self.users).full_name,
                     note="Nasiya savdo",
@@ -849,7 +849,7 @@ class Command(BaseCommand):
 
                 CreditTransaction.objects.create(
                     account=account,
-                    kind=CreditTransaction.KIND_PAYMENT,
+                    kind=CreditTransaction.Kind.PAYMENT,
                     amount=payment,
                     cashier_name=random.choice(self.users).full_name,
                     note="Qarz to'lovi",
