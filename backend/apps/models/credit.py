@@ -40,10 +40,16 @@ class CreditAccount(TimeStampedModel):
         return f'{self.customer_name} ({self.balance})'
 
     def save(self, *args, **kwargs):
-        if self.phone:
-            self.phone = normalize_uz_phone(self.phone)
-        super().save(*args, **kwargs)
+        print('PHONE:', repr(self.phone))
 
+        if self.phone:
+            try:
+                self.phone = normalize_uz_phone(self.phone)
+            except Exception as e:
+                print('FAILED PHONE:', repr(self.phone))
+                raise
+
+        super().save(*args, **kwargs)
 
 class CreditTransaction(TimeStampedModel):
     """Qarz harakati — sotuv (charge) yoki to'lov (payment)."""

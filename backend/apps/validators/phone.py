@@ -17,22 +17,24 @@ def normalize_uz_phone(value: str) -> str:
 
     digits = re.sub(r'\D', '', raw)
 
-    if digits.startswith('998') and len(digits) >= 12:
-        local = digits[-9:]
-    elif digits.startswith('998') and len(digits) < 12:
-        raise ValidationError(
-            "Telefon to'liq emas. +998 dan keyin 9 ta raqam kiriting (masalan 901234567)"
-        )
+    # +998901234567 yoki 998901234567
+    if len(digits) == 12 and digits.startswith('998'):
+        local = digits[3:]
+
+    # 901234567
     elif len(digits) == 9:
         local = digits
+
+    # 0901234567
     elif len(digits) == 10 and digits.startswith('0'):
         local = digits[1:]
-    elif len(digits) == 10 and digits.startswith('9'):
-        local = digits
+
+    # 998 bilan boshlangan, lekin noto'g'ri uzunlik
+    elif digits.startswith('998'):
+        raise ValidationError("Telefon to'liq emas. +998 dan keyin 9 ta raqam kiriting (masalan 901234567)")
+
     else:
-        raise ValidationError(
-            "Telefon noto'g'ri. Namuna: 901234567 yoki +998901234567"
-        )
+        raise ValidationError("Telefon noto'g'ri. Namuna: 901234567 yoki +998901234567")
 
     if not _UZ_PHONE_9_PATTERN.match(local):
         raise ValidationError(
