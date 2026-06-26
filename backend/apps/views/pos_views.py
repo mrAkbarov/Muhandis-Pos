@@ -7,6 +7,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import OrderingFilter
+from apps.pagination import StandardPagination
 
 from apps.models import (
     AgentOrder,
@@ -66,6 +68,7 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = API_PERMISSIONS
     search_fields = ['name']
+    pagination_class = StandardPagination  # sahifa ulandi
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -78,6 +81,7 @@ class SupplierViewSet(BranchScopedMixin, ModelViewSet):
     serializer_class = SupplierSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'status']
+    pagination_class = StandardPagination  # sahifa ulandi
 
     @extend_schema(
         request={
@@ -143,6 +147,7 @@ class WarehouseViewSet(BranchScopedMixin, ModelViewSet):
     serializer_class = WarehouseSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch']
+    pagination_class = StandardPagination  # sahifa ulandi
 
 
 @extend_schema(tags=['Inventory'])
@@ -151,6 +156,7 @@ class InventoryViewSet(ModelViewSet):
     serializer_class = InventoryItemSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['warehouse', 'product']
+    pagination_class = StandardPagination  # sahifa ulandi
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -176,6 +182,7 @@ class PosCartDraftViewSet(BranchScopedMixin, ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['branch']
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
+    pagination_class = StandardPagination  # Sahifa ulandi
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -199,6 +206,7 @@ class SaleViewSet(BranchScopedMixin, ModelViewSet):
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'date', 'method']
     search_fields = ['external_id', 'cashier_name']
+    pagination_class = StandardPagination  # Sahifal ulandi
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -227,6 +235,7 @@ class PurchaseOrderViewSet(BranchScopedMixin, ModelViewSet):
     serializer_class = PurchaseOrderSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'status', 'supplier']
+    pagination_class = StandardPagination  # Sahifa ulandi
 
     @extend_schema(request=PurchaseReceiveSerializer, responses=PurchaseOrderSerializer)
     @action(detail=True, methods=['post'], url_path='receive')
@@ -255,6 +264,7 @@ class AgentOrderViewSet(BranchScopedMixin, ModelViewSet):
     serializer_class = AgentOrderSerializer
     permission_classes = API_PERMISSIONS
     filterset_fields = ['branch', 'supplier']
+    pagination_class = StandardPagination  # sahifa ulandi
 
 
 @extend_schema(tags=['Credit'])
@@ -262,9 +272,22 @@ class CreditAccountViewSet(BranchScopedMixin, ModelViewSet):
     queryset = CreditAccount.objects.select_related('branch').prefetch_related('transactions')
     serializer_class = CreditAccountSerializer
     permission_classes = API_PERMISSIONS
-    filterset_fields = ['branch']
+
+    # pagination class biriktirildi
+    pagination_class = StandardPagination
+
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+
+    # phone filtri va search_fields ga telefon raqam qo'shildi
+    filterset_fields = ['branch', 'phone']
     search_fields = ['customer_name', 'phone']
     http_method_names = ['get', 'head', 'options', 'post']
+
+    # balance va created_at bo'yicha saralash
+    ordering_fields = ['balance', 'created_at', 'customer_name']
+
+    # eng oxirgi qarz olgan birinchi chiqadi
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return super().get_queryset().filter(balance__gt=0)
@@ -293,6 +316,7 @@ class UserStaffViewSet(ModelViewSet):
     permission_classes = API_PERMISSIONS
     http_method_names = ['get', 'head', 'options']
     filterset_fields = ['role', 'branch', 'is_active']
+    pagination_class = StandardPagination  # Sahifalar ulandi
 
     def get_queryset(self):
         from apps.services.branch_access import filter_queryset_by_user_branch
