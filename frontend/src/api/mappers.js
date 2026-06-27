@@ -157,6 +157,7 @@ export function mapCreditAccountFromApi(a) {
     phone: a.phone || '',
     balance: Number(a.balance ?? 0),
     businessId: a.business_id || a.branch,
+    purchaseCount: Number(a.purchase_count ?? 0),
     transactions: (a.transactions || []).map(mapCreditTransactionFromApi),
   };
 }

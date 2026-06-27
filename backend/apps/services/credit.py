@@ -77,11 +77,11 @@ def resolve_credit_account(
     if count == 1:
         return matches_by_name.first()
 
-    raise ValidationError({
-        'customer_name': (
-            f'"{name}" ismli {count} ta mijoz bor — ro\'yxatdan tanlang yoki "Yangi mijoz" bosing'
-        ),
-    })
+    raise ValidationError(
+        {
+            'customer_name': (f'"{name}" ismli {count} ta mijoz bor — ro\'yxatdan tanlang yoki "Yangi mijoz" bosing'),
+        }
+    )
 
 
 @transaction.atomic
@@ -99,7 +99,7 @@ def record_credit_charge(
 ):
     amt = Decimal(str(amount))
     if amt <= 0:
-        raise ValidationError({'amount': 'Summa 0 dan katta bo\'lishi kerak'})
+        raise ValidationError({'amount': "Summa 0 dan katta bo'lishi kerak"})
 
     account = resolve_credit_account(
         branch,
@@ -109,7 +109,14 @@ def record_credit_charge(
         force_new=force_new,
     )
     account.balance += amt
-    account.save(update_fields=['balance'])
+    account.purchase_count += 1
+
+    account.save(
+        update_fields=[
+            'balance',
+            'purchase_count',
+        ]
+    )
     CreditTransaction.objects.create(
         account=account,
         kind=CreditTransaction.Kind.CHARGE,
@@ -125,9 +132,9 @@ def record_credit_charge(
 def record_credit_payment(account, amount, cashier_name='', note=''):
     amt = Decimal(str(amount))
     if amt <= 0:
-        raise ValidationError({'amount': 'To\'lov summasi 0 dan katta bo\'lishi kerak'})
+        raise ValidationError({'amount': "To'lov summasi 0 dan katta bo'lishi kerak"})
     if amt > account.balance:
-        raise ValidationError({'amount': f'Qarz {account.balance} — undan ko\'p to\'lab bo\'lmaydi'})
+        raise ValidationError({'amount': f"Qarz {account.balance} — undan ko'p to'lab bo'lmaydi"})
     account.balance -= amt
     if account.balance < 0:
         account.balance = Decimal('0')

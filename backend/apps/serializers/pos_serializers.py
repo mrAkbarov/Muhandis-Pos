@@ -1,4 +1,5 @@
 import random
+
 from rest_framework.serializers import (
     BooleanField,
     CharField,
@@ -144,6 +145,8 @@ class SaleSerializer(ModelSerializer):
     lines = SaleLineSerializer(many=True, required=False)
     draft_id = CharField(write_only=True, required=False, allow_blank=True)
 
+    credit_account_id = IntegerField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = Sale
         fields = [
@@ -161,6 +164,7 @@ class SaleSerializer(ModelSerializer):
             'lines',
             'draft_id',
             'created_at',
+            'credit_account_id'
         ]
         read_only_fields = ['cashier_name', 'created_at']
 
@@ -168,10 +172,34 @@ class SaleSerializer(ModelSerializer):
         lines_data = validated_data.pop('lines', [])
         draft_id = validated_data.pop('draft_id', None)
 
+        credit_account_id = validated_data.pop('credit_account_id', None)
+
         request = self.context.get('request')
         user = getattr(request, 'user', None)
 
+        
         sale = create_sale_with_stock(validated_data, lines_data, user=user, draft_id=draft_id)
+        if validated_data.get('method') == 'Nasiya' and credit_account_id:
+            from apps.models import CreditAccount, CreditTransaction
+
+            try:
+                account = CreditAccount.objects.get(pk=credit_account_id, branch=sale.branch)
+                # Balansni yangilash
+                account.balance += sale.amount
+                account.save(update_fields=['balance'])
+
+                # Tranzaksiya yaratish
+                CreditTransaction.objects.create(
+                    account=account,
+                    kind=CreditTransaction.Kind.CHARGE,
+                    amount=sale.amount,
+                    sale=sale,
+                    cashier_name=validated_data.get('cashier_name', ''),
+                )
+                print(f"=== QARZ MUVAFFAQIYATLI QO'SHILDI: {account.customer_name} ===")
+            except CreditAccount.DoesNotExist:
+                print(f"=== XATOLIK: ID={credit_account_id} bo'lgan mijoz topilmadi! ===")
+        # ------------------------------------------
         return sale
 
 
@@ -263,6 +291,8 @@ class CreditAccountSerializer(ModelSerializer):
     transactions = CreditTransactionSerializer(many=True, read_only=True)
     phone = UzPhoneField(required=False, allow_blank=True)
 
+    purchase_count = IntegerField(read_only=True)
+
     class Meta:
         model = CreditAccount
         fields = [
@@ -274,6 +304,7 @@ class CreditAccountSerializer(ModelSerializer):
             'balance',
             'transactions',
             'created_at',
+            'purchase_count'
         ]
         read_only_fields = ['balance', 'created_at']
 

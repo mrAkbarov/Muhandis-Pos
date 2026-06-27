@@ -1,19 +1,23 @@
+from datetime import timedelta
+
+from django.db.models import Count, Q
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.filters import OrderingFilter
-from apps.pagination import StandardPagination
 
 from apps.models import (
     AgentOrder,
     Category,
     CreditAccount,
+    CreditTransaction,
     InventoryItem,
     PosCartDraft,
     PurchaseOrder,
@@ -24,6 +28,7 @@ from apps.models import (
     Warehouse,
 )
 from apps.models.base import PurchaseOrderStatus
+from apps.pagination import StandardPagination
 from apps.permissions import IsAuthenticatedNotPlatformOwnerWriter, is_platform_owner
 from apps.serializers.pos_serializers import (
     AgentOrderSerializer,
@@ -290,8 +295,25 @@ class CreditAccountViewSet(BranchScopedMixin, ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        return super().get_queryset().filter(balance__gt=0)
+        # Barcha qarzi bor yoki qarzi nol bo'lsa ham shu filialga tegishli mijozlarni chiqarish
+        # Agar faqat qarzi borlar kerak bo'lsa .filter(balance__gt=0) ni qoldiring
+        last_60_days = timezone.now() - timedelta(days=60)
 
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                purchase_count=Count(
+                    'transactions',
+                    filter=Q(
+                        transactions__kind='charge',
+                        transactions__created_at__gte=last_60_days,
+                    ),
+                )
+            )
+            # .filter(purchase_count__gte=3)  <-- BU QATORNI O'CHIRDIK! Chunki bu qator tufayli state/ro'yxat chalkashayotgan edi
+            .order_by('-created_at') # Yangi qarz olganlar yoki ochilganlar tepada turadi
+        )
     @extend_schema(request=CreditPaymentSerializer, responses=CreditAccountSerializer)
     @action(detail=True, methods=['post'], url_path='pay')
     def pay(self, request, pk=None):
